@@ -1,0 +1,1395 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Sentinel — Dashboard</title>
+
+    <link
+        rel="stylesheet"
+        href="../css/style.css"
+    >
+
+    <style>
+
+        /* =====================================================
+           DASHBOARD
+           ===================================================== */
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1.55fr 1fr;
+            gap: 18px;
+            align-items: stretch;
+        }
+
+        /* Keep the top two dashboard panels visually aligned.
+           Active Incidents scrolls internally when there are
+           more cards than the available panel height. */
+        .dashboard-grid > .dashboard-panel {
+            height: 338px;
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        .dashboard-grid > .dashboard-panel #incidentContainer {
+            max-height: 270px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding-right: 4px;
+        }
+
+        .dashboard-grid > .dashboard-panel #incidentContainer::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .dashboard-grid > .dashboard-panel #incidentContainer::-webkit-scrollbar-track {
+            background: #f8fafc;
+            border-radius: 999px;
+        }
+
+        .dashboard-grid > .dashboard-panel #incidentContainer::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 999px;
+        }
+
+        .dashboard-grid > .dashboard-panel #incidentContainer {
+            scrollbar-width: thin;
+            scrollbar-color: #cbd5e1 #f8fafc;
+        }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 18px;
+        }
+
+        .kpi-card {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .kpi-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .kpi-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f1f5f9;
+            font-size: 16px;
+        }
+
+        .kpi-value {
+            font-size: 30px;
+            font-weight: 800;
+            margin-top: 12px;
+            letter-spacing: -0.5px;
+        }
+
+        .kpi-label {
+            color: #64748b;
+            font-size: 12px;
+            margin-top: 4px;
+        }
+
+        .dashboard-panel {
+            background: white;
+            border-radius: 14px;
+            padding: 20px;
+            box-shadow:
+                0 3px 14px
+                rgba(15, 23, 42, 0.06);
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .panel-title {
+            margin: 0;
+            font-size: 17px;
+            font-weight: 750;
+        }
+
+        .panel-link {
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 650;
+            color: #2563eb;
+        }
+
+        /* =====================================================
+           RISK ACTIVITY
+           ===================================================== */
+
+        .risk-activity {
+            display: flex;
+            align-items: end;
+            gap: 7px;
+            height: 165px;
+            padding: 14px 4px 4px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .risk-bar-wrap {
+            flex: 1;
+            height: 100%;
+            display: flex;
+            align-items: end;
+        }
+
+        .risk-bar {
+            width: 100%;
+            min-height: 5px;
+            border-radius: 5px 5px 2px 2px;
+            background: #2563eb;
+        }
+
+        .risk-bar.low {
+            background: #22c55e;
+        }
+
+        .risk-bar.medium {
+            background: #f59e0b;
+        }
+
+        .risk-bar.high {
+            background: #f97316;
+        }
+
+        .risk-bar.critical {
+            background: #dc2626;
+        }
+
+        .activity-legend {
+            display: flex;
+            gap: 16px;
+            margin-top: 12px;
+            font-size: 11px;
+            color: #64748b;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .legend-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+        }
+
+        .legend-low {
+            background: #22c55e;
+        }
+
+        .legend-medium {
+            background: #f59e0b;
+        }
+
+        .legend-high {
+            background: #f97316;
+        }
+
+        .legend-critical {
+            background: #dc2626;
+        }
+
+        /* =====================================================
+           INCIDENTS
+           ===================================================== */
+
+        .incident-card {
+            border: 1px solid #fecaca;
+            background: #fffafa;
+            border-radius: 11px;
+            padding: 15px;
+            margin-bottom: 11px;
+        }
+
+        .incident-card:last-child {
+            margin-bottom: 0;
+        }
+
+        .incident-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .incident-id {
+            font-weight: 800;
+            font-size: 14px;
+        }
+
+        .incident-type {
+            margin-top: 5px;
+            color: #64748b;
+            font-size: 11px;
+        }
+
+        .incident-metrics {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 13px;
+        }
+
+        .incident-metric {
+            background: white;
+            border-radius: 7px;
+            padding: 9px;
+        }
+
+        .incident-metric-label {
+            font-size: 9px;
+            color: #94a3b8;
+            text-transform: uppercase;
+        }
+
+        .incident-metric-value {
+            margin-top: 3px;
+            font-size: 14px;
+            font-weight: 750;
+        }
+
+        /* =====================================================
+           REVIEW
+           ===================================================== */
+
+        .review-card {
+            border: 1px solid #fde68a;
+            background: #fffbeb;
+            border-radius: 11px;
+            padding: 14px;
+            margin-bottom: 10px;
+        }
+
+        .review-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .review-case {
+            font-weight: 750;
+            font-size: 13px;
+        }
+
+        .review-transaction {
+            font-size: 11px;
+            color: #64748b;
+            margin-top: 4px;
+        }
+
+        .review-risk {
+            font-size: 19px;
+            font-weight: 800;
+        }
+
+        .review-reason {
+            font-size: 11px;
+            color: #64748b;
+            margin-top: 9px;
+        }
+
+        /* =====================================================
+           RECENT TRANSACTIONS
+           ===================================================== */
+
+        .transaction-table-wrap {
+            overflow-x: auto;
+        }
+
+        .transaction-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .transaction-table th,
+        .transaction-table td {
+            padding: 11px 8px;
+            border-bottom: 1px solid #edf0f3;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        .transaction-table th {
+            color: #64748b;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .transaction-table td {
+            font-size: 12px;
+        }
+
+        .transaction-id {
+            font-weight: 700;
+        }
+
+        /* =====================================================
+           EXPOSURE
+           ===================================================== */
+
+        .exposure-value {
+            font-size: 28px;
+            font-weight: 800;
+            margin-top: 6px;
+        }
+
+        .exposure-label {
+            color: #64748b;
+            font-size: 11px;
+        }
+
+        .system-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            background: #ecfdf5;
+            color: #166534;
+            border-radius: 999px;
+            padding: 7px 11px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .system-pill-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #22c55e;
+        }
+
+        /* =====================================================
+           EMPTY STATE
+           ===================================================== */
+
+        .empty-state {
+            padding: 22px 0;
+            color: #94a3b8;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        /* =====================================================
+           RESPONSIVE
+           ===================================================== */
+
+        @media (max-width: 1150px) {
+
+            .kpi-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+        }
+
+        @media (max-width: 700px) {
+
+            .kpi-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .incident-metrics {
+                grid-template-columns: 1fr;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body data-page="dashboard">
+
+
+<div class="app">
+
+
+    <!-- =====================================================
+         SIDEBAR
+         ===================================================== -->
+
+    <aside
+        class="sidebar"
+        id="sidebar"
+    ></aside>
+
+
+    <!-- =====================================================
+         MAIN
+         ===================================================== -->
+
+    <main class="main">
+
+
+        <!-- HEADER -->
+
+        <div class="page-header">
+
+            <div>
+
+                <h1 class="page-title">
+                    Risk Dashboard
+                </h1>
+
+                <div class="page-subtitle">
+                    Real-time Sentinel risk operations
+                </div>
+
+            </div>
+
+
+            <div class="system-pill">
+
+                <span class="system-pill-dot"></span>
+
+                SYSTEM OPERATIONAL
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             KPI CARDS
+             ================================================= -->
+
+        <section class="kpi-grid">
+
+
+            <div class="card kpi-card">
+
+                <div class="kpi-top">
+
+                    <div class="card-label">
+                        TRANSACTIONS
+                    </div>
+
+                    <div class="kpi-icon">
+                        💳
+                    </div>
+
+                </div>
+
+                <div
+                    class="kpi-value"
+                    id="totalTransactions"
+                >
+                    —
+                </div>
+
+                <div class="kpi-label">
+                    Processed by Sentinel
+                </div>
+
+            </div>
+
+
+            <div class="card kpi-card">
+
+                <div class="kpi-top">
+
+                    <div class="card-label">
+                        HIGH RISK
+                    </div>
+
+                    <div class="kpi-icon">
+                        ⚠️
+                    </div>
+
+                </div>
+
+                <div
+                    class="kpi-value"
+                    id="highRisk"
+                >
+                    —
+                </div>
+
+                <div class="kpi-label">
+                    Risk score ≥ 76
+                </div>
+
+            </div>
+
+
+            <div class="card kpi-card">
+
+                <div class="kpi-top">
+
+                    <div class="card-label">
+                        PENDING REVIEW
+                    </div>
+
+                    <div class="kpi-icon">
+                        👤
+                    </div>
+
+                </div>
+
+                <div
+                    class="kpi-value"
+                    id="pendingReviews"
+                >
+                    —
+                </div>
+
+                <div class="kpi-label">
+                    Awaiting analyst action
+                </div>
+
+            </div>
+
+
+            <div class="card kpi-card">
+
+                <div class="kpi-top">
+
+                    <div class="card-label">
+                        BLOCKED
+                    </div>
+
+                    <div class="kpi-icon">
+                        ⛔
+                    </div>
+
+                </div>
+
+                <div
+                    class="kpi-value"
+                    id="blocked"
+                >
+                    —
+                </div>
+
+                <div class="kpi-label">
+                    Automated prevention
+                </div>
+
+            </div>
+
+
+        </section>
+
+
+        <!-- =================================================
+             TOP CONTENT
+             ================================================= -->
+
+        <section class="dashboard-grid">
+
+
+            <!-- =================================================
+                 RISK ACTIVITY
+                 ================================================= -->
+
+            <div class="dashboard-panel">
+
+                <div class="panel-header">
+
+                    <h2 class="panel-title">
+                        Recent Risk Activity
+                    </h2>
+
+                    <a
+                        class="panel-link"
+                        href="transactions.html"
+                    >
+                        View Transactions →
+                    </a>
+
+                </div>
+
+
+                <div
+                    id="riskActivity"
+                    class="risk-activity"
+                ></div>
+
+
+                <div class="activity-legend">
+
+                    <div class="legend-item">
+                        <span
+                            class="legend-dot legend-low"
+                        ></span>
+                        Low
+                    </div>
+
+                    <div class="legend-item">
+                        <span
+                            class="legend-dot legend-medium"
+                        ></span>
+                        Medium
+                    </div>
+
+                    <div class="legend-item">
+                        <span
+                            class="legend-dot legend-high"
+                        ></span>
+                        High
+                    </div>
+
+                    <div class="legend-item">
+                        <span
+                            class="legend-dot legend-critical"
+                        ></span>
+                        Critical
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 ACTIVE INCIDENTS
+                 ================================================= -->
+
+            <div class="dashboard-panel">
+
+                <div class="panel-header">
+
+                    <h2 class="panel-title">
+                        Active Incidents
+                    </h2>
+
+                    <a
+                        class="panel-link"
+                        href="incidents.html"
+                    >
+                        View All →
+                    </a>
+
+                </div>
+
+
+                <div
+                    id="incidentContainer"
+                ></div>
+
+            </div>
+
+
+        </section>
+
+
+        <!-- =================================================
+             RECENT TRANSACTIONS
+             ================================================= -->
+
+        <div
+            class="dashboard-panel"
+            style="margin-top:18px"
+        >
+
+            <div class="panel-header">
+
+                <h2 class="panel-title">
+                    Recent Transactions
+                </h2>
+
+                <a
+                    class="panel-link"
+                    href="transactions.html"
+                >
+                    Open Monitor →
+                </a>
+
+            </div>
+
+
+            <div class="transaction-table-wrap">
+
+                <table class="transaction-table">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Transaction
+                            </th>
+
+                            <th>
+                                Amount
+                            </th>
+
+                            <th>
+                                Risk
+                            </th>
+
+                            <th>
+                                Level
+                            </th>
+
+                            <th>
+                                Decision
+                            </th>
+
+                            <th>
+                                Region
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody
+                        id="transactionTable"
+                    ></tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             BOTTOM CONTENT
+             ================================================= -->
+
+        <section class="dashboard-grid"
+                 style="margin-top:18px">
+
+
+            <!-- REVIEW QUEUE -->
+
+            <div class="dashboard-panel">
+
+                <div class="panel-header">
+
+                    <h2 class="panel-title">
+                        Human Review Queue
+                    </h2>
+
+                    <a
+                        class="panel-link"
+                        href="reviews.html"
+                    >
+                        Open Queue →
+                    </a>
+
+                </div>
+
+
+                <div
+                    id="reviewContainer"
+                ></div>
+
+            </div>
+
+
+            <!-- EXPOSURE -->
+
+            <div class="dashboard-panel">
+
+                <div class="panel-header">
+
+                    <h2 class="panel-title">
+                        High-Risk Exposure
+                    </h2>
+
+                </div>
+
+
+                <div
+                    class="exposure-value"
+                    id="exposure"
+                >
+                    —
+                </div>
+
+                <div class="exposure-label">
+                    Amount associated with risk score ≥ 76
+                </div>
+
+
+                <div
+                    class="preview-note"
+                    style="margin-top:20px"
+                >
+
+                    Sentinel combines ML risk scoring,
+                    regional context, policy controls,
+                    incident detection, and human review.
+
+                </div>
+
+            </div>
+
+
+        </section>
+
+
+    </main>
+
+</div>
+
+
+<!-- =========================================================
+     SHARED APP
+     ========================================================= -->
+
+<script src="../js/app.js"></script>
+
+
+<script>
+
+/* ============================================================
+   RISK BAR CLASS
+   ============================================================ */
+
+function riskClass(
+    risk
+) {
+
+    if (risk < 30) {
+        return "low";
+    }
+
+    if (risk < 58) {
+        return "medium";
+    }
+
+    if (risk < 76) {
+        return "high";
+    }
+
+    return "critical";
+}
+
+
+/* ============================================================
+   LOAD DASHBOARD
+   ============================================================ */
+
+async function loadDashboard() {
+
+    try {
+
+        const [
+            stats,
+            transactions,
+            incidents,
+            reviews
+        ] = await Promise.all([
+
+            api(
+                "/api/dashboard/stats"
+            ),
+
+            api(
+                "/api/transactions/recent?limit=12"
+            ),
+
+            api(
+                "/api/incidents"
+            ),
+
+            api(
+                "/api/reviews"
+            )
+
+        ]);
+
+
+        /* ====================================================
+           KPI
+           ==================================================== */
+
+        document
+            .getElementById(
+                "totalTransactions"
+            )
+            .textContent =
+            stats.total_transactions;
+
+
+        document
+            .getElementById(
+                "highRisk"
+            )
+            .textContent =
+            stats.high_risk_transactions;
+
+
+        document
+            .getElementById(
+                "pendingReviews"
+            )
+            .textContent =
+            stats.pending_reviews;
+
+
+        document
+            .getElementById(
+                "blocked"
+            )
+            .textContent =
+            stats.blocked_transactions;
+
+
+        document
+            .getElementById(
+                "exposure"
+            )
+            .textContent =
+            money(
+                stats.high_risk_exposure
+            );
+
+
+        /* ====================================================
+           TRANSACTION TABLE
+           ==================================================== */
+
+        const transactionBody =
+            document.getElementById(
+                "transactionTable"
+            );
+
+
+        if (
+            !transactions.transactions.length
+        ) {
+
+            transactionBody.innerHTML = `
+                <tr>
+                    <td colspan="6">
+                        <div class="empty-state">
+                            No transaction activity yet.
+                        </div>
+                    </td>
+                </tr>
+            `;
+
+        } else {
+
+            transactionBody.innerHTML =
+                transactions.transactions
+                    .map(
+                        tx => `
+
+                            <tr>
+
+                                <td>
+                                    <span
+                                        class="transaction-id"
+                                    >
+                                        ${tx.transaction_id}
+                                    </span>
+                                </td>
+
+                                <td>
+                                    ${money(tx.amount)}
+                                </td>
+
+                                <td>
+                                    ${Number(
+                                        tx.risk_score
+                                    ).toFixed(2)}
+                                </td>
+
+                                <td>
+                                    ${badge(
+                                        tx.risk_level
+                                    )}
+                                </td>
+
+                                <td>
+                                    ${badge(
+                                        tx.decision
+                                    )}
+                                </td>
+
+                                <td>
+                                    ${tx.region_key || "—"}
+                                </td>
+
+                            </tr>
+                        `
+                    )
+                    .join("");
+        }
+
+
+        /* ====================================================
+           RISK ACTIVITY
+           ==================================================== */
+
+        const activity =
+            document.getElementById(
+                "riskActivity"
+            );
+
+
+        if (
+            !transactions.transactions.length
+        ) {
+
+            activity.innerHTML = `
+                <div class="empty-state">
+                    Waiting for transaction activity.
+                </div>
+            `;
+
+        } else {
+
+            /*
+             * Reverse so older events appear on
+             * the left and newest on the right.
+             */
+
+            const ordered =
+                [...transactions.transactions]
+                    .reverse();
+
+
+            activity.innerHTML =
+                ordered
+                    .map(
+                        tx => {
+
+                            const risk =
+                                Math.max(
+                                    3,
+                                    Math.min(
+                                        100,
+                                        Number(
+                                            tx.risk_score
+                                        )
+                                    )
+                                );
+
+                            return `
+                                <div
+                                    class="risk-bar-wrap"
+                                    title="
+                                        ${tx.transaction_id}
+                                        — Risk ${Number(
+                                            tx.risk_score
+                                        ).toFixed(2)}
+                                    "
+                                >
+                                    <div
+                                        class="
+                                            risk-bar
+                                            ${riskClass(
+                                                Number(
+                                                    tx.risk_score
+                                                )
+                                            )}
+                                        "
+                                        style="
+                                            height:${risk}%;
+                                        "
+                                    ></div>
+                                </div>
+                            `;
+                        }
+                    )
+                    .join("");
+        }
+
+
+        /* ====================================================
+           INCIDENTS
+           ==================================================== */
+
+        const incidentContainer =
+            document.getElementById(
+                "incidentContainer"
+            );
+
+
+        const openIncidents =
+            incidents.incidents.filter(
+                incident =>
+                    incident.status === "OPEN"
+            );
+
+
+        if (!openIncidents.length) {
+
+            incidentContainer.innerHTML =
+                `
+                <div class="empty-state">
+                    No active incidents.
+                </div>
+                `;
+
+        } else {
+
+            incidentContainer.innerHTML =
+                openIncidents
+                    .slice(0, 3)
+                    .map(
+                        incident => `
+
+                            <div
+                                class="incident-card"
+                            >
+
+                                <div
+                                    class="incident-head"
+                                >
+
+                                    <div>
+
+                                        <div
+                                            class="incident-id"
+                                        >
+                                            ${
+                                                incident.incident_id
+                                            }
+                                        </div>
+
+                                        <div
+                                            class="incident-type"
+                                        >
+                                            ${
+                                                incident.incident_type
+                                            }
+                                        </div>
+
+                                    </div>
+
+                                    ${badge(
+                                        incident.severity
+                                    )}
+
+                                </div>
+
+
+                                <div
+                                    class="incident-metrics"
+                                >
+
+                                    <div
+                                        class="incident-metric"
+                                    >
+
+                                        <div
+                                            class="incident-metric-label"
+                                        >
+                                            Region
+                                        </div>
+
+                                        <div
+                                            class="incident-metric-value"
+                                        >
+                                            ${
+                                                incident.region_key
+                                            }
+                                        </div>
+
+                                    </div>
+
+
+                                    <div
+                                        class="incident-metric"
+                                    >
+
+                                        <div
+                                            class="incident-metric-label"
+                                        >
+                                            Affected
+                                        </div>
+
+                                        <div
+                                            class="incident-metric-value"
+                                        >
+                                            ${
+                                                incident.affected_transactions
+                                            }
+                                        </div>
+
+                                    </div>
+
+
+                                    <div
+                                        class="incident-metric"
+                                    >
+
+                                        <div
+                                            class="incident-metric-label"
+                                        >
+                                            Z-score
+                                        </div>
+
+                                        <div
+                                            class="incident-metric-value"
+                                        >
+                                            ${Number(
+                                                incident.z_score
+                                            ).toFixed(2)}
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+                        `
+                    )
+                    .join("");
+        }
+
+
+        /* ====================================================
+           REVIEWS
+           ==================================================== */
+
+        const reviewContainer =
+            document.getElementById(
+                "reviewContainer"
+            );
+
+
+        const pendingReviews =
+            reviews.reviews.filter(
+                review =>
+                    review.status === "PENDING"
+            );
+
+
+        if (!pendingReviews.length) {
+
+            reviewContainer.innerHTML =
+                `
+                <div class="empty-state">
+                    No pending review cases.
+                </div>
+                `;
+
+        } else {
+
+            reviewContainer.innerHTML =
+                pendingReviews
+                    .slice(0, 4)
+                    .map(
+                        review => `
+
+                            <div
+                                class="review-card"
+                            >
+
+                                <div
+                                    class="review-head"
+                                >
+
+                                    <div>
+
+                                        <div
+                                            class="review-case"
+                                        >
+                                            ${
+                                                review.case_id
+                                            }
+                                        </div>
+
+                                        <div
+                                            class="review-transaction"
+                                        >
+                                            Transaction
+                                            ${
+                                                review.transaction_id
+                                            }
+                                        </div>
+
+                                    </div>
+
+                                    <div
+                                        class="review-risk"
+                                    >
+                                        ${Number(
+                                            review.risk_score
+                                        ).toFixed(2)}
+                                    </div>
+
+                                </div>
+
+
+                                <div
+                                    class="review-reason"
+                                >
+                                    ${
+                                        (
+                                            review.reasons
+                                            || []
+                                        ).join(", ")
+                                    }
+                                </div>
+
+                            </div>
+                        `
+                    )
+                    .join("");
+        }
+
+
+    } catch (error) {
+
+        console.error(
+            "Dashboard error:",
+            error
+        );
+
+    }
+
+}
+
+
+/* ============================================================
+   INITIAL LOAD
+   ============================================================ */
+
+loadDashboard();
+
+
+/* ============================================================
+   AUTO REFRESH
+   ============================================================ */
+
+setInterval(
+    loadDashboard,
+    5000
+);
+
+</script>
+
+</body>
+
+</html>

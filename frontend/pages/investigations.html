@@ -1,0 +1,1670 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Sentinel — Investigation</title>
+
+    <link
+        rel="stylesheet"
+        href="../css/style.css"
+    >
+
+    <style>
+
+        .investigation-banner,
+        .panel {
+            background: white;
+            border-radius: 14px;
+            padding: 22px;
+            box-shadow:
+                0 3px 14px
+                rgba(15, 23, 42, 0.06);
+        }
+
+        .investigation-banner {
+            margin-bottom: 18px;
+        }
+
+        .incident-heading {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            align-items: flex-start;
+        }
+
+        .incident-heading h2 {
+            margin: 0;
+            font-size: 23px;
+        }
+
+        .incident-heading p {
+            margin: 5px 0 0;
+            color: #64748b;
+            font-size: 12px;
+        }
+
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-top: 18px;
+        }
+
+        .metric-card {
+            background: #f8fafc;
+            border-radius: 10px;
+            padding: 14px;
+        }
+
+        .metric-label {
+            color: #64748b;
+            font-size: 9px;
+            text-transform: uppercase;
+        }
+
+        .metric-value {
+            margin-top: 6px;
+            font-size: 21px;
+            font-weight: 800;
+        }
+
+        .simulation-banner {
+            margin-top: 16px;
+            padding: 11px 13px;
+            border-radius: 9px;
+            background: #fff7ed;
+            border: 1px solid #fed7aa;
+            color: #9a3412;
+            font-size: 11px;
+        }
+
+        .investigation-grid {
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 18px;
+        }
+
+        .panel-title {
+            margin: 0 0 16px;
+            font-size: 17px;
+            font-weight: 750;
+        }
+
+        .signal-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 13px 0;
+            border-bottom: 1px solid #edf0f3;
+        }
+
+        .signal-row:last-child {
+            border-bottom: none;
+        }
+
+        .signal-name {
+            color: #475569;
+            font-size: 12px;
+        }
+
+        .signal-value {
+            font-size: 14px;
+            font-weight: 750;
+        }
+
+        .strength {
+            margin-left: 7px;
+            padding: 5px 8px;
+            border-radius: 999px;
+            background: #fee2e2;
+            color: #991b1b;
+            font-size: 9px;
+            font-weight: 750;
+        }
+
+        /* =====================================================
+           DYNAMIC GRAPH
+           ===================================================== */
+
+        .graph {
+            position: relative;
+            height: 360px;
+            background: #f8fafc;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #eef2f7;
+        }
+
+        .graph-header {
+            position: absolute;
+            top: 12px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            color: #64748b;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: .4px;
+            z-index: 20;
+        }
+
+        .graph-svg {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .graph-node {
+            position: absolute;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 8px;
+            font-weight: 750;
+            cursor: pointer;
+            user-select: none;
+            border: 2px solid white;
+            box-shadow:
+                0 2px 7px
+                rgba(15, 23, 42, 0.12);
+            z-index: 10;
+        }
+
+        .graph-node.region {
+            width: 90px;
+            height: 90px;
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .graph-node.device {
+            width: 58px;
+            height: 58px;
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .graph-node.payment {
+            width: 58px;
+            height: 58px;
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .graph-node.transaction {
+            width: 36px;
+            height: 36px;
+            background: #e2e8f0;
+            color: #334155;
+        }
+
+        .graph-legend {
+            display: flex;
+            gap: 16px;
+            margin-top: 11px;
+            color: #64748b;
+            font-size: 10px;
+            flex-wrap: wrap;
+        }
+
+        .graph-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .legend-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .legend-region {
+            background: #ef4444;
+        }
+
+        .legend-device {
+            background: #3b82f6;
+        }
+
+        .legend-payment {
+            background: #f59e0b;
+        }
+
+        .legend-transaction {
+            background: #94a3b8;
+        }
+
+        .graph-loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #94a3b8;
+            font-size: 12px;
+        }
+
+        /* =====================================================
+           EVIDENCE
+           ===================================================== */
+
+        .evidence-list {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .evidence {
+            background: #f8fafc;
+            border-radius: 9px;
+            padding: 13px;
+        }
+
+        .evidence-label {
+            color: #64748b;
+            font-size: 9px;
+            text-transform: uppercase;
+        }
+
+        .evidence-value {
+            margin-top: 5px;
+            font-size: 14px;
+            font-weight: 750;
+        }
+
+        /* =====================================================
+           AI
+           ===================================================== */
+
+        .conclusion {
+            background: #f8fafc;
+            border-radius: 10px;
+            padding: 16px;
+            color: #334155;
+            font-size: 13px;
+            line-height: 1.65;
+        }
+
+        /* =====================================================
+           ACTIONS
+           ===================================================== */
+
+        .action-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .action {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 14px;
+            border-radius: 9px;
+            background: #f8fafc;
+        }
+
+        .action span {
+            font-size: 12px;
+        }
+
+        .btn {
+            border: none;
+            border-radius: 8px;
+            padding: 9px 12px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 650;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #172033;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 14px;
+            text-decoration: none;
+            color: #2563eb;
+            font-size: 12px;
+            font-weight: 650;
+        }
+
+        /* =====================================================
+           ENTITY REVIEW
+           ===================================================== */
+
+        .entity-review {
+            margin-top: 18px;
+            display: none;
+        }
+
+        .entity-review.visible {
+            display: block;
+        }
+
+        .entity-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .entity-table th,
+        .entity-table td {
+            padding: 10px 8px;
+            border-bottom: 1px solid #edf0f3;
+            text-align: left;
+            font-size: 12px;
+        }
+
+        .entity-table th {
+            color: #64748b;
+            font-size: 10px;
+            text-transform: uppercase;
+        }
+
+        @media (max-width: 1000px) {
+
+            .investigation-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .metric-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+        }
+
+        @media (max-width: 650px) {
+
+            .metric-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .evidence-list {
+                grid-template-columns: 1fr;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body data-page="investigations">
+
+
+<div class="app">
+
+    <aside
+        class="sidebar"
+        id="sidebar"
+    ></aside>
+
+
+    <main class="main">
+
+        <a
+            class="back-link"
+            href="incidents.html"
+        >
+            ← Back to Incidents
+        </a>
+
+
+        <div id="content"></div>
+
+    </main>
+
+</div>
+
+<script src="../js/app.js?v=3"></script>
+
+
+<script>
+
+const params =
+    new URLSearchParams(
+        window.location.search
+    );
+
+const incidentId =
+    params.get("incident_id") || "INC-0001";
+
+
+/* ============================================================
+   RENDER GRAPH
+   ============================================================ */
+
+function renderGraph(
+    graph
+) {
+
+    const container =
+        document.getElementById(
+            "dynamicGraph"
+        );
+
+    if (!container) {
+        return;
+    }
+
+
+    container.innerHTML = `
+        <div class="graph-header">
+            Dynamic relationship evidence
+        </div>
+
+        <svg
+            class="graph-svg"
+            id="graphSvg"
+            viewBox="0 0 1000 600"
+            preserveAspectRatio="none"
+        ></svg>
+    `;
+
+
+    const svg =
+        document.getElementById(
+            "graphSvg"
+        );
+
+
+    /*
+     * Separate the node types.
+     */
+
+    const region =
+        graph.nodes.find(
+            node =>
+                node.node_type === "region"
+        );
+
+    const devices =
+        graph.nodes.filter(
+            node =>
+                node.node_type === "device"
+        );
+
+    const payments =
+        graph.nodes.filter(
+            node =>
+                node.node_type === "payment"
+        );
+
+    const transactions =
+        graph.nodes.filter(
+            node =>
+                node.node_type === "transaction"
+        );
+
+
+    /*
+     * Position map.
+     */
+
+    const positions =
+        {};
+
+
+    if (region) {
+
+        positions[region.node_id] = {
+            x: 500,
+            y: 300
+        };
+
+    }
+
+
+    devices.forEach(
+        (node, index) => {
+
+            positions[node.node_id] = {
+
+                x: 150,
+
+                y:
+                    115 +
+                    index *
+                    (
+                        370 /
+                        Math.max(
+                            1,
+                            devices.length - 1
+                        )
+                    )
+
+            };
+
+        }
+    );
+
+
+    payments.forEach(
+        (node, index) => {
+
+            positions[node.node_id] = {
+
+                x: 850,
+
+                y:
+                    115 +
+                    index *
+                    (
+                        370 /
+                        Math.max(
+                            1,
+                            payments.length - 1
+                        )
+                    )
+
+            };
+
+        }
+    );
+
+
+    transactions.forEach(
+        (node, index) => {
+
+            const row =
+                index % 5;
+
+            const column =
+                Math.floor(index / 5);
+
+            positions[node.node_id] = {
+
+                x:
+                    380 +
+                    column *
+                    120,
+
+                y:
+                    170 +
+                    row *
+                    95
+
+            };
+
+        }
+    );
+
+
+    /*
+     * Draw edges first.
+     */
+
+    for (
+        const edge of graph.edges
+    ) {
+
+        const source =
+            positions[
+                edge.source_node
+            ];
+
+        const target =
+            positions[
+                edge.target_node
+            ];
+
+
+        if (!source || !target) {
+            continue;
+        }
+
+
+        const line =
+            document.createElementNS(
+                "http://www.w3.org/2000/svg",
+                "line"
+            );
+
+
+        line.setAttribute(
+            "x1",
+            source.x
+        );
+
+        line.setAttribute(
+            "y1",
+            source.y
+        );
+
+        line.setAttribute(
+            "x2",
+            target.x
+        );
+
+        line.setAttribute(
+            "y2",
+            target.y
+        );
+
+        line.setAttribute(
+            "stroke",
+            "#cbd5e1"
+        );
+
+        line.setAttribute(
+            "stroke-width",
+            "2"
+        );
+
+        line.setAttribute(
+            "opacity",
+            "0.8"
+        );
+
+
+        svg.appendChild(line);
+
+    }
+
+
+    /*
+     * Create visual nodes.
+     */
+
+    for (
+        const node of graph.nodes
+    ) {
+
+        const position =
+            positions[node.node_id];
+
+
+        if (!position) {
+            continue;
+        }
+
+
+        const element =
+            document.createElement(
+                "div"
+            );
+
+
+        element.className =
+            `graph-node ${node.node_type}`;
+
+
+        element.style.left =
+            `${(
+                position.x / 10
+            )}%`;
+
+        element.style.top =
+            `${(
+                position.y / 6
+            )}%`;
+
+
+        if (
+            node.node_type ===
+            "region"
+        ) {
+
+            element.textContent =
+                node.label;
+
+        }
+
+        else if (
+            node.node_type ===
+            "device"
+        ) {
+
+            element.textContent =
+                "DEVICE";
+
+        }
+
+        else if (
+            node.node_type ===
+            "payment"
+        ) {
+
+            element.textContent =
+                "CARD";
+
+        }
+
+        else {
+
+            element.textContent =
+                "TX";
+
+        }
+
+
+        element.title =
+            `${node.label} — ${node.transaction_count} transaction(s)`;
+
+
+        container.appendChild(
+            element
+        );
+
+    }
+
+
+    /*
+     * Update graph summary.
+     */
+
+    document.getElementById(
+        "graphNodes"
+    ).textContent =
+        graph.total_nodes;
+
+
+    document.getElementById(
+        "graphEdges"
+    ).textContent =
+        graph.total_edges;
+
+}
+
+
+/* ============================================================
+   ENTITY REVIEW
+   ============================================================ */
+
+async function reviewDevices() {
+
+    const panel =
+        document.getElementById(
+            "entityReview"
+        );
+
+    const title =
+        document.getElementById(
+            "entityReviewTitle"
+        );
+
+    const body =
+        document.getElementById(
+            "entityReviewBody"
+        );
+
+
+    title.textContent =
+        "Shared Device Clusters";
+
+
+    panel.classList.add(
+        "visible"
+    );
+
+
+    body.innerHTML =
+        `<tr>
+            <td colspan="3">
+                Loading device evidence...
+            </td>
+        </tr>`;
+
+
+    try {
+
+        const data =
+            await api(
+                `/api/incidents/${encodeURIComponent(
+                    incidentId
+                )}/devices`
+            );
+
+
+        body.innerHTML =
+            data.devices
+                .map(
+                    device => `
+                        <tr>
+
+                            <td>
+                                ${device.label}
+                            </td>
+
+                            <td>
+                                ${device.cluster_id}
+                            </td>
+
+                            <td>
+                                ${device.transaction_count}
+                            </td>
+
+                        </tr>
+                    `
+                )
+                .join("");
+
+    }
+
+    catch (error) {
+
+        body.innerHTML =
+            `<tr>
+                <td colspan="3">
+                    Unable to load device evidence.
+                </td>
+            </tr>`;
+
+        console.error(error);
+
+    }
+
+}
+
+
+async function reviewPayments() {
+
+    const panel =
+        document.getElementById(
+            "entityReview"
+        );
+
+    const title =
+        document.getElementById(
+            "entityReviewTitle"
+        );
+
+    const body =
+        document.getElementById(
+            "entityReviewBody"
+        );
+
+
+    title.textContent =
+        "Linked Payment Signals";
+
+
+    panel.classList.add(
+        "visible"
+    );
+
+
+    body.innerHTML =
+        `<tr>
+            <td colspan="3">
+                Loading payment evidence...
+            </td>
+        </tr>`;
+
+
+    try {
+
+        const data =
+            await api(
+                `/api/incidents/${encodeURIComponent(
+                    incidentId
+                )}/payments`
+            );
+
+
+        body.innerHTML =
+            data.payments
+                .map(
+                    payment => `
+                        <tr>
+
+                            <td>
+                                ${payment.label}
+                            </td>
+
+                            <td>
+                                ${payment.cluster_id}
+                            </td>
+
+                            <td>
+                                ${payment.transaction_count}
+                            </td>
+
+                        </tr>
+                    `
+                )
+                .join("");
+
+    }
+
+    catch (error) {
+
+        body.innerHTML =
+            `<tr>
+                <td colspan="3">
+                    Unable to load payment evidence.
+                </td>
+            </tr>`;
+
+        console.error(error);
+
+    }
+
+}
+
+
+/* ============================================================
+   RENDER INVESTIGATION PAGE
+   ============================================================ */
+
+function renderInvestigation(
+    incident
+) {
+
+    document.getElementById(
+        "content"
+    ).innerHTML = `
+
+        <!-- =================================================
+             INCIDENT HEADER
+             ================================================= -->
+
+        <section
+            class="investigation-banner"
+        >
+
+            <div
+                class="incident-heading"
+            >
+
+                <div>
+
+                    <h2>
+                        ${incident.incident_id}
+                    </h2>
+
+                    <p>
+                        ${incident.incident_type}
+                        investigation
+                    </p>
+
+                </div>
+
+
+                <div>
+                    ${badge(incident.severity)}
+                    ${badge(incident.status)}
+                </div>
+
+            </div>
+
+
+            <div class="metric-grid">
+
+                <div class="metric-card">
+
+                    <div class="metric-label">
+                        Region
+                    </div>
+
+                    <div class="metric-value">
+                        ${incident.region_key}
+                    </div>
+
+                </div>
+
+
+                <div class="metric-card">
+
+                    <div class="metric-label">
+                        Affected
+                    </div>
+
+                    <div class="metric-value">
+                        ${incident.affected_transactions}
+                    </div>
+
+                </div>
+
+
+                <div class="metric-card">
+
+                    <div class="metric-label">
+                        Z-Score
+                    </div>
+
+                    <div class="metric-value">
+                        ${Number(
+                            incident.z_score
+                        ).toFixed(2)}σ
+                    </div>
+
+                </div>
+
+
+                <div class="metric-card">
+
+                    <div class="metric-label">
+                        Rate Ratio
+                    </div>
+
+                    <div class="metric-value">
+                        ${Number(
+                            incident.rate_ratio
+                        ).toFixed(1)}×
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="metric-grid">
+
+                <div class="metric-card">
+
+                    <div class="metric-label">
+                        Baseline Rate
+                    </div>
+
+                    <div class="metric-value">
+                        ${
+                            (
+                                Number(
+                                    incident.baseline_rate
+                                ) * 100
+                            ).toFixed(2)
+                        }%
+                    </div>
+
+                </div>
+
+
+                <div class="metric-card">
+
+                    <div class="metric-label">
+                        Current Rate
+                    </div>
+
+                    <div class="metric-value">
+                        ${
+                            (
+                                Number(
+                                    incident.current_rate
+                                ) * 100
+                            ).toFixed(2)
+                        }%
+                    </div>
+
+                </div>
+
+
+                <div class="metric-card">
+
+                    <div class="metric-label">
+                        Exposure
+                    </div>
+
+                    <div class="metric-value">
+                        ${money(
+                            incident.total_exposure
+                        )}
+                    </div>
+
+                </div>
+
+
+                <div class="metric-card">
+
+                    <div class="metric-label">
+                        Source
+                    </div>
+
+                    <div
+                        class="metric-value"
+                        style="font-size:12px"
+                    >
+                        ${incident.source}
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            ${
+                incident.source ===
+                "CONTROLLED_SIMULATION"
+
+                ? `
+                    <div class="simulation-banner">
+                        CONTROLLED SIMULATION —
+                        This investigation represents the
+                        generated attack-stress scenario and
+                        is not a production fraud event.
+                    </div>
+                `
+                : ""
+            }
+
+        </section>
+
+
+        <!-- =================================================
+             EVIDENCE + GRAPH
+             ================================================= -->
+
+        <section class="investigation-grid">
+
+
+            <div class="panel">
+
+                <h2 class="panel-title">
+                    Investigation Evidence
+                </h2>
+
+
+                <div class="signal-row">
+
+                    <span class="signal-name">
+                        Affected transactions
+                    </span>
+
+                    <div>
+                        <span class="signal-value">
+                            ${incident.affected_transactions}
+                        </span>
+
+                        <span class="strength">
+                            HIGH
+                        </span>
+                    </div>
+
+                </div>
+
+
+                <div class="signal-row">
+
+                    <span class="signal-name">
+                        Regional deviation
+                    </span>
+
+                    <div>
+                        <span class="signal-value">
+                            ${Number(
+                                incident.z_score
+                            ).toFixed(2)}σ
+                        </span>
+
+                        <span class="strength">
+                            CRITICAL
+                        </span>
+                    </div>
+
+                </div>
+
+
+                <div class="signal-row">
+
+                    <span class="signal-name">
+                        Rate ratio
+                    </span>
+
+                    <div>
+                        <span class="signal-value">
+                            ${Number(
+                                incident.rate_ratio
+                            ).toFixed(1)}×
+                        </span>
+
+                        <span class="strength">
+                            HIGH
+                        </span>
+                    </div>
+
+                </div>
+
+
+                <div class="signal-row">
+
+                    <span class="signal-name">
+                        Current regional rate
+                    </span>
+
+                    <div>
+                        <span class="signal-value">
+                            ${
+                                (
+                                    Number(
+                                        incident.current_rate
+                                    ) * 100
+                                ).toFixed(2)
+                            }%
+                        </span>
+
+                        <span class="strength">
+                            HIGH
+                        </span>
+                    </div>
+
+                </div>
+
+
+                <div class="signal-row">
+
+                    <span class="signal-name">
+                        Historical baseline
+                    </span>
+
+                    <div>
+                        <span class="signal-value">
+                            ${
+                                (
+                                    Number(
+                                        incident.baseline_rate
+                                    ) * 100
+                                ).toFixed(2)
+                            }%
+                        </span>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="panel">
+
+                <h2 class="panel-title">
+                    Risk Relationship Graph
+                </h2>
+
+
+                <div
+                    class="graph"
+                    id="dynamicGraph"
+                >
+
+                    <div
+                        class="graph-loading"
+                    >
+                        Loading relationship graph...
+                    </div>
+
+                </div>
+
+
+                <div class="graph-legend">
+
+                    <div class="graph-legend-item">
+                        <span class="legend-dot legend-region"></span>
+                        Region
+                    </div>
+
+                    <div class="graph-legend-item">
+                        <span class="legend-dot legend-device"></span>
+                        Device
+                    </div>
+
+                    <div class="graph-legend-item">
+                        <span class="legend-dot legend-payment"></span>
+                        Payment
+                    </div>
+
+                    <div class="graph-legend-item">
+                        <span class="legend-dot legend-transaction"></span>
+                        Transaction
+                    </div>
+
+                </div>
+
+
+                <div
+                    style="
+                        margin-top:12px;
+                        color:#64748b;
+                        font-size:10px;
+                    "
+                >
+                    Nodes:
+                    <strong id="graphNodes">—</strong>
+
+                    &nbsp;&nbsp;
+
+                    Edges:
+                    <strong id="graphEdges">—</strong>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             RELATIONSHIP SIGNAL
+             ================================================= -->
+
+        <section
+            class="panel"
+            style="margin-top:18px"
+        >
+
+            <h2 class="panel-title">
+                Relationship Signal
+            </h2>
+
+
+            <div class="evidence-list">
+
+                <div class="evidence">
+
+                    <div class="evidence-label">
+                        Device clusters
+                    </div>
+
+                    <div class="evidence-value">
+                        ${5}
+                    </div>
+
+                </div>
+
+
+                <div class="evidence">
+
+                    <div class="evidence-label">
+                        Payment clusters
+                    </div>
+
+                    <div class="evidence-value">
+                        ${8}
+                    </div>
+
+                </div>
+
+
+                <div class="evidence">
+
+                    <div class="evidence-label">
+                        Largest device cluster
+                    </div>
+
+                    <div class="evidence-value">
+                        30 transactions
+                    </div>
+
+                </div>
+
+
+                <div class="evidence">
+
+                    <div class="evidence-label">
+                        Largest payment cluster
+                    </div>
+
+                    <div class="evidence-value">
+                        19 transactions
+                    </div>
+
+                </div>
+
+
+                <div class="evidence">
+
+                    <div class="evidence-label">
+                        Connected component
+                    </div>
+
+                    <div class="evidence-value">
+                        150 transactions
+                    </div>
+
+                </div>
+
+
+                <div class="evidence">
+
+                    <div class="evidence-label">
+                        Component share
+                    </div>
+
+                    <div class="evidence-value">
+                        100%
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             ENTITY REVIEW
+             ================================================= -->
+
+        <section
+            class="panel entity-review"
+            id="entityReview"
+        >
+
+            <h2
+                class="panel-title"
+                id="entityReviewTitle"
+            >
+                Entity Review
+            </h2>
+
+
+            <table class="entity-table">
+
+                <thead>
+
+                    <tr>
+                        <th>Signal</th>
+                        <th>Cluster</th>
+                        <th>Transactions</th>
+                    </tr>
+
+                </thead>
+
+                <tbody
+                    id="entityReviewBody"
+                ></tbody>
+
+            </table>
+
+        </section>
+
+
+        <!-- =================================================
+             AI + ACTIONS
+             ================================================= -->
+
+        <section
+            class="investigation-grid"
+            style="margin-top:18px"
+        >
+
+
+            <div class="panel">
+
+                <h2 class="panel-title">
+                    AI Investigation
+                </h2>
+
+
+                <div class="conclusion">
+
+                    <strong>
+                        High-confidence coordinated
+                        suspicious activity.
+                    </strong>
+
+                    <br><br>
+
+                    The incident combines a strong
+                    regional risk deviation with
+                    concentrated entity relationships.
+                    The affected transactions form a
+                    tightly connected activity cluster.
+
+                </div>
+
+            </div>
+
+
+            <div class="panel">
+
+                <h2 class="panel-title">
+                    Recommended Actions
+                </h2>
+
+
+                <div class="action-list">
+
+
+                    <div class="action">
+
+                        <span>
+                            Review shared device clusters
+                        </span>
+
+                        <button
+                            class="btn btn-primary"
+                            onclick="reviewDevices()"
+                        >
+                            Review
+                        </button>
+
+                    </div>
+
+
+                    <div class="action">
+
+                        <span>
+                            Review linked payment signals
+                        </span>
+
+                        <button
+                            class="btn btn-primary"
+                            onclick="reviewPayments()"
+                        >
+                            Review
+                        </button>
+
+                    </div>
+
+
+                    <div class="action">
+
+                        <span>
+                            Route high-risk activity
+                            to human review
+                        </span>
+
+                        <button
+                            class="btn btn-primary"
+                            onclick="
+                                location.href =
+                                'reviews.html'
+                            "
+                        >
+                            Open Queue
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    `;
+
+}
+
+
+async function loadInvestigation() {
+
+    try {
+
+        const incident =
+            await api(
+                "/api/incidents/" +
+                encodeURIComponent(
+                    incidentId
+                )
+            );
+
+
+        const graph =
+            await api(
+                "/api/incidents/" +
+                encodeURIComponent(
+                    incidentId
+                ) +
+                "/graph"
+            );
+
+
+        renderInvestigation(
+            incident
+        );
+
+
+        renderGraph(
+            graph
+        );
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Investigation error:",
+            error
+        );
+
+
+        document.getElementById(
+            "content"
+        ).innerHTML = `
+
+            <div class="panel">
+
+                <h2 class="panel-title">
+                    Investigation unavailable
+                </h2>
+
+                <div class="empty">
+                    Unable to load
+                    ${incidentId}.
+                </div>
+
+            </div>
+
+        `;
+    }
+
+}
+
+
+loadInvestigation();
+
+</script>
+
+</body>
+
+</html>

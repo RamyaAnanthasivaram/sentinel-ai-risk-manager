@@ -1,0 +1,1395 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Sentinel — Simulate Transaction</title>
+
+    <link
+        rel="stylesheet"
+        href="../css/style.css"
+    >
+
+    <style>
+
+        .form-panel {
+            background: white;
+            border-radius: 14px;
+            padding: 24px;
+            box-shadow:
+                0 3px 14px
+                rgba(15, 23, 42, 0.06);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .field label {
+            color: #475569;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .3px;
+        }
+
+        .field input,
+        .field select {
+            width: 100%;
+            box-sizing: border-box;
+            border: 1px solid #dbe2ea;
+            border-radius: 9px;
+            padding: 11px 12px;
+            font-family: inherit;
+            font-size: 12px;
+            outline: none;
+        }
+
+        .field input:focus,
+        .field select:focus {
+            border-color: #2563eb;
+        }
+
+        .notice {
+            margin-bottom: 18px;
+            padding: 12px 14px;
+            border-radius: 9px;
+            background: #fff7ed;
+            border: 1px solid #fed7aa;
+            color: #9a3412;
+            font-size: 11px;
+            line-height: 1.5;
+        }
+
+        .button-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            border: none;
+            border-radius: 8px;
+            padding: 11px 16px;
+            font-family: inherit;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #172033;
+        }
+
+        .btn-secondary:hover {
+            background: #dbe0e6;
+        }
+
+        .btn:disabled {
+            opacity: .6;
+            cursor: not-allowed;
+        }
+
+        .result {
+            display: none;
+            margin-top: 18px;
+        }
+
+        .result.show {
+            display: block;
+        }
+
+        .result-card {
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #dbe2ea;
+            background: #f8fafc;
+        }
+
+        .result-card.allow {
+            background: #ecfdf5;
+            border-color: #bbf7d0;
+        }
+
+        .result-card.review {
+            background: #fffbeb;
+            border-color: #fde68a;
+        }
+
+        .result-card.block {
+            background: #fffafa;
+            border-color: #fecaca;
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .result-title {
+            font-size: 18px;
+            font-weight: 800;
+        }
+
+        .result-id {
+            color: #64748b;
+            font-size: 11px;
+            margin-top: 4px;
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .result-metric {
+            background: white;
+            border-radius: 8px;
+            padding: 11px;
+        }
+
+        .metric-label {
+            color: #64748b;
+            font-size: 8px;
+            text-transform: uppercase;
+        }
+
+        .metric-value {
+            margin-top: 4px;
+            font-size: 15px;
+            font-weight: 750;
+        }
+
+        .result-reasons {
+            margin-top: 14px;
+            background: white;
+            border-radius: 8px;
+            padding: 12px;
+            color: #475569;
+            font-size: 11px;
+            line-height: 1.5;
+        }
+
+        .error-box {
+            display: none;
+            margin-top: 16px;
+            padding: 12px;
+            border-radius: 8px;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+            font-size: 11px;
+            line-height: 1.5;
+        }
+
+        .error-box.show {
+            display: block;
+        }
+
+        .success-link {
+            display: inline-block;
+            margin-top: 14px;
+            margin-right: 14px;
+            color: #2563eb;
+            text-decoration: none;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .success-link:hover {
+            text-decoration: underline;
+        }
+
+        .hint {
+            color: #94a3b8;
+            font-size: 10px;
+        }
+
+        @media (max-width: 800px) {
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .result-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+        }
+
+        @media (max-width: 500px) {
+
+            .result-grid {
+                grid-template-columns: 1fr;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body data-page="simulate">
+
+
+<div class="app">
+
+    <aside
+        class="sidebar"
+        id="sidebar"
+    ></aside>
+
+
+    <main class="main">
+
+
+        <div class="page-header">
+
+            <div>
+
+                <h1 class="page-title">
+                    Simulate Transaction
+                </h1>
+
+                <div class="page-subtitle">
+                    Send a test transaction through Sentinel's risk pipeline
+                </div>
+
+            </div>
+
+
+            <div class="status">
+
+                <span class="status-dot"></span>
+
+                Test Mode
+
+            </div>
+
+        </div>
+
+
+        <section class="form-panel">
+
+
+            <div class="notice">
+
+                <strong>
+                    TEST TRANSACTION ONLY
+                </strong>
+
+                <br>
+
+                No real money is transferred.
+                This sends a transaction event to Sentinel for
+                risk scoring, policy evaluation, review creation,
+                and audit logging.
+
+            </div>
+
+
+            <div class="form-grid">
+
+
+                <!-- TRANSACTION ID -->
+
+                <div class="field">
+
+                    <label>
+                        Transaction ID
+                    </label>
+
+                    <input
+                        id="transaction_id"
+                        type="text"
+                        placeholder="TX-TEST-10001"
+                    >
+
+                    <div class="hint">
+                        Use a new ID for every test.
+                    </div>
+
+                </div>
+
+
+                <!-- AMOUNT -->
+
+                <div class="field">
+
+                    <label>
+                        Amount
+                    </label>
+
+                    <input
+                        id="amount"
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        placeholder="250.00"
+                    >
+
+                </div>
+
+
+                <!-- CUSTOMER -->
+
+                <div class="field">
+
+                    <label>
+                        Customer ID
+                    </label>
+
+                    <input
+                        id="customer_id"
+                        type="text"
+                        placeholder="CUS-TEST-001"
+                    >
+
+                </div>
+
+
+                <!-- MERCHANT -->
+
+                <div class="field">
+
+                    <label>
+                        Merchant ID
+                    </label>
+
+                    <input
+                        id="merchant_id"
+                        type="text"
+                        value="MER-001"
+                    >
+
+                </div>
+
+
+                <!-- PAYMENT -->
+
+                <div class="field">
+
+                    <label>
+                        Payment Method
+                    </label>
+
+                    <select
+                        id="payment_method"
+                    >
+
+                        <option value="card">
+                            card
+                        </option>
+
+                        <option value="upi">
+                            upi
+                        </option>
+
+                        <option value="bank_transfer">
+                            bank_transfer
+                        </option>
+
+                        <option value="wallet">
+                            wallet
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- DEVICE -->
+
+                <div class="field">
+
+                    <label>
+                        Device ID
+                    </label>
+
+                    <input
+                        id="device_id"
+                        type="text"
+                        placeholder="DEV-TEST-001"
+                    >
+
+                </div>
+
+
+                <!-- IP -->
+
+                <div class="field">
+
+                    <label>
+                        IP Address
+                    </label>
+
+                    <input
+                        id="ip_address"
+                        type="text"
+                        placeholder="10.10.10.50"
+                    >
+
+                </div>
+
+
+                <!-- REGION -->
+
+                <div class="field">
+
+                    <label>
+                        Region
+                    </label>
+
+                    <input
+                        id="region"
+                        type="text"
+                        value="REGION-TEST"
+                    >
+
+                </div>
+
+
+            </div>
+
+
+            <div class="button-row">
+
+
+                <button
+                    class="btn btn-primary"
+                    id="submitButton"
+                    type="button"
+                    onclick="submitTransaction()"
+                >
+                    Score Transaction
+                </button>
+
+
+                <button
+                    class="btn btn-secondary"
+                    id="generateButton"
+                    type="button"
+                    onclick="generateTransaction()"
+                >
+                    Generate Test Data
+                </button>
+
+
+            </div>
+
+
+            <div
+                id="errorBox"
+                class="error-box"
+            ></div>
+
+
+            <div
+                id="result"
+                class="result"
+            ></div>
+
+
+        </section>
+
+
+    </main>
+
+</div>
+
+
+<script src="../js/app.js?v=4"></script>
+
+
+<script>
+
+/* ============================================================
+   GENERATE TEST DATA
+   ============================================================ */
+
+function generateTransaction() {
+
+    const number =
+        Math.floor(
+            10000 +
+            Math.random() * 90000
+        );
+
+
+    document.getElementById(
+        "transaction_id"
+    ).value =
+        `TX-TEST-${number}`;
+
+
+    document.getElementById(
+        "amount"
+    ).value =
+        (
+            50 +
+            Math.random() * 450
+        ).toFixed(2);
+
+
+    document.getElementById(
+        "customer_id"
+    ).value =
+        `CUS-TEST-${number}`;
+
+
+    document.getElementById(
+        "device_id"
+    ).value =
+        `DEV-TEST-${number}`;
+
+
+    document.getElementById(
+        "ip_address"
+    ).value =
+        `10.10.10.${Math.floor(
+            10 +
+            Math.random() * 200
+        )}`;
+
+
+    document.getElementById(
+        "region"
+    ).value =
+        "REGION-TEST";
+
+}
+
+
+/* ============================================================
+   SUBMIT TRANSACTION
+   ============================================================ */
+
+async function submitTransaction() {
+
+
+    const button =
+        document.getElementById(
+            "submitButton"
+        );
+
+
+    const errorBox =
+        document.getElementById(
+            "errorBox"
+        );
+
+
+    const result =
+        document.getElementById(
+            "result"
+        );
+
+
+    /* --------------------------------------------------------
+       CLEAR PREVIOUS RESULT
+       -------------------------------------------------------- */
+
+    errorBox.classList.remove(
+        "show"
+    );
+
+    errorBox.textContent =
+        "";
+
+
+    result.classList.remove(
+        "show"
+    );
+
+
+    /* --------------------------------------------------------
+       READ FORM VALUES
+       -------------------------------------------------------- */
+
+    const transactionId =
+        document.getElementById(
+            "transaction_id"
+        ).value.trim();
+
+
+    const amount =
+        Number(
+            document.getElementById(
+                "amount"
+            ).value
+        );
+
+
+    const customerId =
+        document.getElementById(
+            "customer_id"
+        ).value.trim();
+
+
+    const merchantId =
+        document.getElementById(
+            "merchant_id"
+        ).value.trim();
+
+
+    const paymentMethod =
+        document.getElementById(
+            "payment_method"
+        ).value;
+
+
+    const deviceId =
+        document.getElementById(
+            "device_id"
+        ).value.trim();
+
+
+    const ipAddress =
+        document.getElementById(
+            "ip_address"
+        ).value.trim();
+
+
+    const region =
+        document.getElementById(
+            "region"
+        ).value.trim();
+
+
+    /* --------------------------------------------------------
+       VALIDATION
+       -------------------------------------------------------- */
+
+    if (!transactionId) {
+
+        showError(
+            "Please enter a Transaction ID."
+        );
+
+        return;
+
+    }
+
+
+    if (
+        !Number.isFinite(
+            amount
+        )
+        ||
+        amount <= 0
+    ) {
+
+        showError(
+            "Please enter a valid amount."
+        );
+
+        return;
+
+    }
+
+
+    if (!customerId) {
+
+        showError(
+            "Please enter a Customer ID."
+        );
+
+        return;
+
+    }
+
+
+    if (!merchantId) {
+
+        showError(
+            "Please enter a Merchant ID."
+        );
+
+        return;
+
+    }
+
+
+    if (!deviceId) {
+
+        showError(
+            "Please enter a Device ID."
+        );
+
+        return;
+
+    }
+
+
+    if (!ipAddress) {
+
+        showError(
+            "Please enter an IP Address."
+        );
+
+        return;
+
+    }
+
+
+    if (!region) {
+
+        showError(
+            "Please enter a Region."
+        );
+
+        return;
+
+    }
+
+
+    /* --------------------------------------------------------
+       REQUEST BODY
+       -------------------------------------------------------- */
+
+    const body = {
+
+        transaction_id:
+            transactionId,
+
+        amount:
+            amount,
+
+        customer_id:
+            customerId,
+
+        merchant_id:
+            merchantId,
+
+        payment_method:
+            paymentMethod,
+
+        device_id:
+            deviceId,
+
+        ip_address:
+            ipAddress,
+
+        region:
+            region,
+
+        model_features:
+            {}
+
+    };
+
+
+    /* --------------------------------------------------------
+       SUBMIT
+       -------------------------------------------------------- */
+
+    button.disabled =
+        true;
+
+    button.textContent =
+        "Scoring...";
+
+
+    try {
+
+
+        const response =
+            await fetch(
+                API +
+                "/api/transactions",
+                {
+                    method:
+                        "POST",
+
+                    headers: {
+
+                        "Content-Type":
+                            "application/json",
+
+                        "Accept":
+                            "application/json"
+
+                    },
+
+                    body:
+                        JSON.stringify(
+                            body
+                        )
+
+                }
+            );
+
+
+        let data =
+            null;
+
+
+        try {
+
+            data =
+                await response.json();
+
+        }
+
+        catch (_) {
+
+            data =
+                null;
+
+        }
+
+
+        if (!response.ok) {
+
+            const detail =
+                data &&
+                data.detail
+                    ? data.detail
+                    : `HTTP ${response.status}`;
+
+            throw new Error(
+                detail
+            );
+
+        }
+
+
+        /* ----------------------------------------------------
+           SHOW RESULT
+           ---------------------------------------------------- */
+
+        showResult(
+            data
+        );
+
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Transaction submission error:",
+            error
+        );
+
+
+        showError(
+            error.message
+            ||
+            "Unable to submit transaction."
+        );
+
+    }
+
+    finally {
+
+        button.disabled =
+            false;
+
+        button.textContent =
+            "Score Transaction";
+
+    }
+
+}
+
+
+/* ============================================================
+   SHOW RESULT
+   ============================================================ */
+
+function showResult(
+    data
+) {
+
+
+    const result =
+        document.getElementById(
+            "result"
+        );
+
+
+    /* --------------------------------------------------------
+       RISK OBJECT
+       -------------------------------------------------------- */
+
+    const risk =
+        data &&
+        data.risk
+            ? data.risk
+            : {};
+
+
+    /* --------------------------------------------------------
+       DECISION OBJECT
+       -------------------------------------------------------- */
+
+    const decisionObject =
+        data &&
+        data.decision
+            ? data.decision
+            : {};
+
+
+    let decision =
+        "";
+
+
+    if (
+        typeof decisionObject ===
+        "string"
+    ) {
+
+        decision =
+            decisionObject;
+
+    }
+
+    else {
+
+        decision =
+            decisionObject.action
+            ||
+            decisionObject.decision
+            ||
+            "";
+
+    }
+
+
+    decision =
+        String(
+            decision
+        ).toUpperCase();
+
+
+    /* --------------------------------------------------------
+       REASONS
+       -------------------------------------------------------- */
+
+    let reasons = [];
+
+
+    if (
+        Array.isArray(
+            decisionObject.reasons
+        )
+    ) {
+
+        reasons =
+            decisionObject.reasons;
+
+    }
+
+    else if (
+        Array.isArray(
+            data.reasons
+        )
+    ) {
+
+        reasons =
+            data.reasons;
+
+    }
+
+
+    /* --------------------------------------------------------
+       RESULT CLASS
+       -------------------------------------------------------- */
+
+    let resultClass =
+        "";
+
+
+    if (
+        decision ===
+        "ALLOW"
+    ) {
+
+        resultClass =
+            "allow";
+
+    }
+
+    else if (
+        decision ===
+        "REVIEW"
+    ) {
+
+        resultClass =
+            "review";
+
+    }
+
+    else if (
+        decision ===
+        "BLOCK"
+    ) {
+
+        resultClass =
+            "block";
+
+    }
+
+
+    /* --------------------------------------------------------
+       TRANSACTION ID
+       -------------------------------------------------------- */
+
+    const transactionId =
+        data &&
+        data.transaction_id
+            ? data.transaction_id
+            : document.getElementById(
+                "transaction_id"
+            ).value;
+
+
+    /* --------------------------------------------------------
+       RISK VALUES
+       -------------------------------------------------------- */
+
+    const probability =
+        Number(
+            risk.risk_probability
+            ?? 0
+        );
+
+
+    const score =
+        Number(
+            risk.risk_score
+            ?? (
+                probability *
+                100
+            )
+        );
+
+
+    const riskLevel =
+        risk.risk_level
+        ||
+        "—";
+
+
+    const modelVersion =
+        risk.model_version
+        ||
+        "—";
+
+
+    /* --------------------------------------------------------
+       RENDER
+       -------------------------------------------------------- */
+
+    result.innerHTML = `
+
+        <div
+            class="
+                result-card
+                ${resultClass}
+            "
+        >
+
+            <div
+                class="result-header"
+            >
+
+                <div>
+
+                    <div
+                        class="result-title"
+                    >
+                        Transaction Scored
+                    </div>
+
+
+                    <div
+                        class="result-id"
+                    >
+                        ${escapeHtml(
+                            transactionId
+                        )}
+                    </div>
+
+                </div>
+
+
+                ${
+                    decision
+                        ? badge(
+                            decision
+                        )
+                        : ""
+                }
+
+            </div>
+
+
+            <div
+                class="result-grid"
+            >
+
+
+                <div
+                    class="result-metric"
+                >
+
+                    <div
+                        class="metric-label"
+                    >
+                        Risk Probability
+                    </div>
+
+                    <div
+                        class="metric-value"
+                    >
+                        ${probability.toFixed(6)}
+                    </div>
+
+                </div>
+
+
+                <div
+                    class="result-metric"
+                >
+
+                    <div
+                        class="metric-label"
+                    >
+                        Risk Score
+                    </div>
+
+                    <div
+                        class="metric-value"
+                    >
+                        ${score.toFixed(2)}
+                    </div>
+
+                </div>
+
+
+                <div
+                    class="result-metric"
+                >
+
+                    <div
+                        class="metric-label"
+                    >
+                        Risk Level
+                    </div>
+
+                    <div
+                        class="metric-value"
+                    >
+                        ${escapeHtml(
+                            riskLevel
+                        )}
+                    </div>
+
+                </div>
+
+
+                <div
+                    class="result-metric"
+                >
+
+                    <div
+                        class="metric-label"
+                    >
+                        Model
+                    </div>
+
+                    <div
+                        class="metric-value"
+                    >
+                        ${escapeHtml(
+                            modelVersion
+                        )}
+                    </div>
+
+                </div>
+
+
+            </div>
+
+
+            <div
+                class="result-reasons"
+            >
+
+                <strong>
+                    Decision:
+                </strong>
+
+                ${
+                    escapeHtml(
+                        decision
+                        || "—"
+                    )
+                }
+
+
+                ${
+                    reasons.length
+                        ? `
+                            <br><br>
+
+                            <strong>
+                                Reasons:
+                            </strong>
+
+                            ${reasons
+                                .map(
+                                    reason =>
+                                        `
+                                        <div>
+                                            • ${
+                                                escapeHtml(
+                                                    reason
+                                                )
+                                            }
+                                        </div>
+                                        `
+                                )
+                                .join("")
+                            }
+                        `
+                        : ""
+                }
+
+            </div>
+
+
+            <a
+                class="success-link"
+                href="transactions.html"
+            >
+                Open Transaction Monitor →
+            </a>
+
+
+            ${
+                decision ===
+                "REVIEW"
+
+                    ? `
+                        <a
+                            class="success-link"
+                            href="reviews.html"
+                        >
+                            Open Human Review →
+                        </a>
+                    `
+                    : ""
+            }
+
+
+        </div>
+
+    `;
+
+
+    result.classList.add(
+        "show"
+    );
+
+}
+
+
+/* ============================================================
+   ERROR
+   ============================================================ */
+
+function showError(
+    message
+) {
+
+    const errorBox =
+        document.getElementById(
+            "errorBox"
+        );
+
+
+    errorBox.textContent =
+        message;
+
+
+    errorBox.classList.add(
+        "show"
+    );
+
+}
+
+
+/* ============================================================
+   SAFE TEXT
+   ============================================================ */
+
+function escapeHtml(
+    value
+) {
+
+    return String(
+        value ?? ""
+    )
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+
+}
+
+</script>
+
+
+</body>
+
+</html>

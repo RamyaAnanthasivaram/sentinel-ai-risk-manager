@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Sentinel — Incidents</title>
+
+    <link
+        rel="stylesheet"
+        href="../css/style.css"
+    >
+
+    <style>
+
+        .incident-summary-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .summary-card {
+            background: white;
+            border-radius: 14px;
+            padding: 18px;
+            box-shadow:
+                0 3px 14px
+                rgba(15, 23, 42, 0.06);
+        }
+
+        .summary-label {
+            color: #64748b;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        .summary-value {
+            margin-top: 7px;
+            font-size: 27px;
+            font-weight: 800;
+        }
+
+        .incident-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .incident-panel {
+            background: white;
+            border-radius: 14px;
+            padding: 22px;
+            box-shadow:
+                0 3px 14px
+                rgba(15, 23, 42, 0.06);
+        }
+
+        .incident-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 15px;
+        }
+
+        .incident-id {
+            font-size: 20px;
+            font-weight: 800;
+        }
+
+        .incident-type {
+            color: #64748b;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .incident-badges {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .incident-metrics {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .incident-metric {
+            background: #f8fafc;
+            border-radius: 9px;
+            padding: 13px;
+        }
+
+        .metric-label {
+            color: #64748b;
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .metric-value {
+            margin-top: 5px;
+            font-size: 17px;
+            font-weight: 750;
+        }
+
+        .incident-description {
+            margin-top: 18px;
+            color: #475569;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .simulation-banner {
+            margin-top: 16px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            background: #fff7ed;
+            border: 1px solid #fed7aa;
+            color: #9a3412;
+            font-size: 11px;
+            font-weight: 650;
+        }
+
+        .incident-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 18px;
+        }
+
+        .btn {
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 650;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #172033;
+        }
+
+        .empty-state {
+            background: white;
+            border-radius: 14px;
+            padding: 40px;
+            text-align: center;
+            color: #94a3b8;
+            box-shadow:
+                0 3px 14px
+                rgba(15, 23, 42, 0.06);
+        }
+
+        @media (max-width: 1100px) {
+
+            .incident-metrics {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+        }
+
+        @media (max-width: 800px) {
+
+            .incident-summary-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .incident-metrics {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+        }
+
+        @media (max-width: 550px) {
+
+            .incident-metrics {
+                grid-template-columns: 1fr;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body data-page="incidents">
+
+
+<div class="app">
+
+    <!-- =====================================================
+         SIDEBAR
+         ===================================================== -->
+
+    <aside
+        class="sidebar"
+        id="sidebar"
+    ></aside>
+
+
+    <!-- =====================================================
+         MAIN
+         ===================================================== -->
+
+    <main class="main">
+
+        <div class="page-header">
+
+            <div>
+
+                <h1 class="page-title">
+                    Incidents
+                </h1>
+
+                <div class="page-subtitle">
+                    Coordinated risk events requiring investigation
+                </div>
+
+            </div>
+
+            <div class="status">
+
+                <span class="status-dot"></span>
+
+                Incident Monitoring
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             SUMMARY
+             ================================================= -->
+
+        <section class="incident-summary-grid">
+
+            <div class="summary-card">
+
+                <div class="summary-label">
+                    Open Incidents
+                </div>
+
+                <div
+                    class="summary-value"
+                    id="openCount"
+                >
+                    —
+                </div>
+
+            </div>
+
+
+            <div class="summary-card">
+
+                <div class="summary-label">
+                    Critical Incidents
+                </div>
+
+                <div
+                    class="summary-value"
+                    id="criticalCount"
+                >
+                    —
+                </div>
+
+            </div>
+
+
+            <div class="summary-card">
+
+                <div class="summary-label">
+                    Affected Transactions
+                </div>
+
+                <div
+                    class="summary-value"
+                    id="affectedCount"
+                >
+                    —
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             INCIDENT LIST
+             ================================================= -->
+
+        <section
+            class="incident-list"
+            id="incidentList"
+        ></section>
+
+    </main>
+
+</div>
+
+
+<script src="../js/app.js?v=3"></script>
+
+
+<script>
+
+async function loadIncidents() {
+
+    try {
+
+        const [
+            incidentData,
+            stats
+        ] = await Promise.all([
+
+            api(
+                "/api/incidents"
+            ),
+
+            api(
+                "/api/incidents/stats"
+            )
+
+        ]);
+
+
+        const incidents =
+            incidentData.incidents || [];
+
+
+        /* ==================================================
+           SUMMARY
+           ================================================== */
+
+        document
+            .getElementById("openCount")
+            .textContent =
+            stats.open_incidents;
+
+
+        document
+            .getElementById("criticalCount")
+            .textContent =
+            stats.critical_incidents;
+
+
+        const affected =
+            incidents
+                .filter(
+                    incident =>
+                        incident.status === "OPEN"
+                )
+                .reduce(
+                    (
+                        total,
+                        incident
+                    ) =>
+                        total +
+                        Number(
+                            incident.affected_transactions || 0
+                        ),
+                    0
+                );
+
+
+        document
+            .getElementById("affectedCount")
+            .textContent =
+            affected;
+
+
+        /* ==================================================
+           INCIDENT LIST
+           ================================================== */
+
+        const container =
+            document.getElementById(
+                "incidentList"
+            );
+
+
+        if (!incidents.length) {
+
+            container.innerHTML = `
+                <div class="empty-state">
+                    No incidents detected.
+                </div>
+            `;
+
+            return;
+        }
+
+
+        container.innerHTML =
+            incidents
+                .map(
+                    incident => `
+
+                        <article
+                            class="incident-panel"
+                        >
+
+                            <div
+                                class="incident-header"
+                            >
+
+                                <div>
+
+                                    <div
+                                        class="incident-id"
+                                    >
+                                        ${
+                                            incident.incident_id
+                                        }
+                                    </div>
+
+                                    <div
+                                        class="incident-type"
+                                    >
+                                        ${
+                                            incident.incident_type
+                                        }
+                                    </div>
+
+                                </div>
+
+
+                                <div
+                                    class="incident-badges"
+                                >
+
+                                    ${badge(
+                                        incident.severity
+                                    )}
+
+                                    ${badge(
+                                        incident.status
+                                    )}
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- =========================
+                                 METRICS
+                                 ========================= -->
+
+                            <div
+                                class="incident-metrics"
+                            >
+
+                                <div
+                                    class="incident-metric"
+                                >
+
+                                    <div class="metric-label">
+                                        Region
+                                    </div>
+
+                                    <div class="metric-value">
+                                        ${
+                                            incident.region_key
+                                        }
+                                    </div>
+
+                                </div>
+
+
+                                <div
+                                    class="incident-metric"
+                                >
+
+                                    <div class="metric-label">
+                                        Affected
+                                    </div>
+
+                                    <div class="metric-value">
+                                        ${
+                                            incident.affected_transactions
+                                        }
+                                    </div>
+
+                                </div>
+
+
+                                <div
+                                    class="incident-metric"
+                                >
+
+                                    <div class="metric-label">
+                                        Baseline
+                                    </div>
+
+                                    <div class="metric-value">
+                                        ${
+                                            (
+                                                Number(
+                                                    incident.baseline_rate
+                                                ) * 100
+                                            ).toFixed(2)
+                                        }%
+                                    </div>
+
+                                </div>
+
+
+                                <div
+                                    class="incident-metric"
+                                >
+
+                                    <div class="metric-label">
+                                        Current
+                                    </div>
+
+                                    <div class="metric-value">
+                                        ${
+                                            (
+                                                Number(
+                                                    incident.current_rate
+                                                ) * 100
+                                            ).toFixed(2)
+                                        }%
+                                    </div>
+
+                                </div>
+
+
+                                <div
+                                    class="incident-metric"
+                                >
+
+                                    <div class="metric-label">
+                                        Z-Score
+                                    </div>
+
+                                    <div class="metric-value">
+                                        ${Number(
+                                            incident.z_score
+                                        ).toFixed(2)}
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- =========================
+                                 SECONDARY METRICS
+                                 ========================= -->
+
+                            <div
+                                class="incident-metrics"
+                            >
+
+                                <div
+                                    class="incident-metric"
+                                >
+
+                                    <div class="metric-label">
+                                        Rate Ratio
+                                    </div>
+
+                                    <div class="metric-value">
+                                        ${Number(
+                                            incident.rate_ratio
+                                        ).toFixed(1)}×
+                                    </div>
+
+                                </div>
+
+
+                                <div
+                                    class="incident-metric"
+                                >
+
+                                    <div class="metric-label">
+                                        Exposure
+                                    </div>
+
+                                    <div class="metric-value">
+                                        ${money(
+                                            incident.total_exposure
+                                        )}
+                                    </div>
+
+                                </div>
+
+
+                                <div
+                                    class="incident-metric"
+                                >
+
+                                    <div class="metric-label">
+                                        Start Bin
+                                    </div>
+
+                                    <div class="metric-value">
+                                        ${
+                                            incident.start_time_bin
+                                        }
+                                    </div>
+
+                                </div>
+
+
+                                <div
+                                    class="incident-metric"
+                                >
+
+                                    <div class="metric-label">
+                                        End Bin
+                                    </div>
+
+                                    <div class="metric-value">
+                                        ${
+                                            incident.end_time_bin
+                                        }
+                                    </div>
+
+                                </div>
+
+
+                                <div
+                                    class="incident-metric"
+                                >
+
+                                    <div class="metric-label">
+                                        Source
+                                    </div>
+
+                                    <div
+                                        class="metric-value"
+                                        style="
+                                            font-size:12px;
+                                        "
+                                    >
+                                        ${
+                                            incident.source
+                                        }
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- =========================
+                                 DESCRIPTION
+                                 ========================= -->
+
+                            <div
+                                class="incident-description"
+                            >
+                                ${
+                                    incident.description
+                                    || "No additional description."
+                                }
+                            </div>
+
+
+                            ${
+                                incident.source ===
+                                "CONTROLLED_SIMULATION"
+
+                                ? `
+
+                                    <div
+                                        class="simulation-banner"
+                                    >
+                                        CONTROLLED SIMULATION —
+                                        This incident represents
+                                        Sentinel's attack-stress
+                                        scenario and is not a
+                                        production fraud event.
+                                    </div>
+
+                                `
+                                : ""
+                            }
+
+
+                            <!-- =========================
+                                 ACTIONS
+                                 ========================= -->
+
+                            <div
+                                class="incident-actions"
+                            >
+
+                                <a
+                                    class="btn btn-primary"
+                                    href="#"
+                                    onclick="
+                                        window.location.href =
+                                        'investigations.html?incident_id=' +
+                                        encodeURIComponent(
+                                            '${incident.incident_id}'
+                                        );
+                                        return false;
+                                    "
+                                >
+                                    Investigate Incident
+                                </a>
+
+
+                                <a
+                                    class="btn btn-secondary"
+                                    href="
+                                        dashboard.html
+                                    "
+                                >
+                                    Back to Dashboard
+                                </a>
+
+                            </div>
+
+                        </article>
+                    `
+                )
+                .join("");
+
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Incident page error:",
+            error
+        );
+
+
+        document.getElementById(
+            "incidentList"
+        ).innerHTML = `
+            <div class="empty-state">
+                Unable to load incident data.
+            </div>
+        `;
+
+    }
+
+}
+
+
+loadIncidents();
+
+setInterval(
+    loadIncidents,
+    10000
+);
+
+</script>
+
+</body>
+
+</html>

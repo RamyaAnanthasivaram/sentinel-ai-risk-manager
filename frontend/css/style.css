@@ -1,0 +1,759 @@
+/* =========================================================
+   GLOBAL
+   ========================================================= */
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+}
+
+body {
+    font-family:
+        Inter,
+        "Segoe UI",
+        Arial,
+        sans-serif;
+
+    background: #f5f7fb;
+    color: #172033;
+}
+
+
+/* =========================================================
+   APP LAYOUT
+   ========================================================= */
+
+.app {
+    min-height: 100vh;
+    width: 100%;
+}
+
+
+/* =========================================================
+   SIDEBAR
+   ========================================================= */
+
+.sidebar {
+    position: fixed;
+
+    top: 0;
+    left: 0;
+
+    width: 245px;
+    height: 100vh;
+
+    background: #111827;
+    color: white;
+
+    padding: 24px 14px;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    flex-shrink: 0;
+
+    z-index: 1000;
+
+    scrollbar-width: thin;
+    scrollbar-color: #475569 #111827;
+}
+
+
+/* Sidebar scrollbar - Chrome / Edge */
+
+.sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+    background: #111827;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background: #475569;
+    border-radius: 999px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+    background: #64748b;
+}
+
+
+/* =========================================================
+   LOGO
+   ========================================================= */
+
+.logo {
+    padding: 8px 14px 28px;
+}
+
+.logo-title {
+    font-size: 22px;
+    font-weight: 800;
+}
+
+.logo-subtitle {
+    color: #94a3b8;
+    font-size: 11px;
+    margin-top: 4px;
+    letter-spacing: 1px;
+}
+
+
+/* =========================================================
+   NAVIGATION
+   ========================================================= */
+
+.nav-section {
+    margin: 18px 10px 8px;
+
+    color: #64748b;
+
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    text-decoration: none;
+
+    color: #cbd5e1;
+
+    padding: 11px 14px;
+
+    border-radius: 8px;
+
+    margin: 3px 0;
+
+    font-size: 14px;
+
+    transition:
+        background 0.15s ease,
+        color 0.15s ease;
+}
+
+.nav-link:hover {
+    background: #1f2937;
+    color: white;
+}
+
+.nav-link.active {
+    background: #2563eb;
+    color: white;
+}
+
+
+/* =========================================================
+   MAIN CONTENT
+   ========================================================= */
+
+.main {
+    margin-left: 245px;
+
+    width: calc(100% - 245px);
+
+    min-height: 100vh;
+
+    padding: 28px;
+
+    min-width: 0;
+}
+
+
+/* =========================================================
+   PAGE HEADER
+   ========================================================= */
+
+.page-header {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    margin-bottom: 24px;
+
+    gap: 20px;
+}
+
+.page-title {
+    margin: 0;
+    font-size: 27px;
+}
+
+.page-subtitle {
+    color: #64748b;
+    margin-top: 5px;
+    font-size: 13px;
+}
+
+.status {
+    display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    color: #166534;
+
+    font-size: 12px;
+
+    font-weight: 600;
+
+    white-space: nowrap;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+
+    border-radius: 50%;
+
+    background: #22c55e;
+
+    flex-shrink: 0;
+}
+
+
+/* =========================================================
+   KPI CARDS
+   ========================================================= */
+
+.cards {
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, 1fr);
+
+    gap: 16px;
+
+    margin-bottom: 22px;
+}
+
+.card {
+    background: white;
+
+    border-radius: 14px;
+
+    padding: 20px;
+
+    box-shadow:
+        0 3px 14px
+        rgba(15, 23, 42, 0.06);
+
+    transition:
+        transform 0.15s ease,
+        box-shadow 0.15s ease;
+}
+
+.card-label {
+    color: #64748b;
+    font-size: 12px;
+}
+
+.card-value {
+    font-size: 30px;
+
+    font-weight: 750;
+
+    margin-top: 8px;
+}
+
+
+/* =========================================================
+   TWO COLUMN GRID
+   ========================================================= */
+
+.grid-2 {
+    display: grid;
+
+    grid-template-columns:
+        2fr 1fr;
+
+    gap: 18px;
+
+    align-items: start;
+}
+
+.grid-2 > .panel {
+    align-self: start;
+    height: fit-content;
+}
+
+/* =========================================================
+   PANELS
+   ========================================================= */
+
+.panel {
+    background: white;
+
+    border-radius: 14px;
+
+    padding: 20px;
+
+    box-shadow:
+        0 3px 14px
+        rgba(15, 23, 42, 0.06);
+
+    transition:
+        transform 0.15s ease,
+        box-shadow 0.15s ease;
+}
+
+.panel-title {
+    font-size: 17px;
+
+    font-weight: 700;
+
+    margin-bottom: 16px;
+}
+
+
+/* =========================================================
+   HOVER EFFECTS
+   ========================================================= */
+
+.panel:hover,
+.card:hover,
+.threshold-card:hover {
+    box-shadow:
+        0 7px 22px
+        rgba(15, 23, 42, 0.08);
+}
+
+
+/* =========================================================
+   TABLES
+   ========================================================= */
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th,
+td {
+    padding: 12px 9px;
+
+    border-bottom:
+        1px solid #e5e7eb;
+
+    text-align: left;
+
+    font-size: 13px;
+}
+
+th {
+    color: #64748b;
+
+    font-size: 11px;
+
+    text-transform: uppercase;
+}
+
+
+/* =========================================================
+   BADGES
+   ========================================================= */
+
+.badge {
+    display: inline-block;
+
+    padding: 5px 9px;
+
+    border-radius: 999px;
+
+    font-size: 10px;
+
+    font-weight: 750;
+}
+
+.badge.ALLOW {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.badge.REVIEW {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.badge.BLOCK {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.badge.CRITICAL {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.badge.HIGH {
+    background: #ffedd5;
+    color: #9a3412;
+}
+
+.badge.MEDIUM {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.badge.LOW {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.badge.OPEN {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.badge.RESOLVED {
+    background: #dcfce7;
+    color: #166534;
+}
+
+
+/* =========================================================
+   BUTTONS
+   ========================================================= */
+
+.btn {
+    border: none;
+
+    padding: 9px 13px;
+
+    border-radius: 8px;
+
+    cursor: pointer;
+
+    font-weight: 650;
+
+    font-family: inherit;
+
+    transition:
+        background 0.15s ease,
+        transform 0.1s ease;
+}
+
+.btn-primary {
+    background: #2563eb;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #1d4ed8;
+}
+
+.btn-secondary {
+    background: #e5e7eb;
+    color: #172033;
+}
+
+.btn-secondary:hover {
+    background: #d1d5db;
+}
+
+button {
+    font-family: inherit;
+}
+
+button:active {
+    transform: translateY(1px);
+}
+
+
+/* =========================================================
+   EMPTY STATE
+   ========================================================= */
+
+.empty {
+    color: #94a3b8;
+    padding: 18px 0;
+}
+
+
+/* =========================================================
+   INCIDENT
+   ========================================================= */
+
+.incident-card {
+    border:
+        1px solid #fee2e2;
+
+    background: #fffafa;
+
+    padding: 18px;
+
+    border-radius: 12px;
+
+    margin-bottom: 14px;
+}
+
+.incident-card h3 {
+    margin: 0 0 7px;
+}
+
+
+/* =========================================================
+   METRICS
+   ========================================================= */
+
+.metric-row {
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, 1fr);
+
+    gap: 12px;
+
+    margin-top: 14px;
+}
+
+.metric {
+    background: #f8fafc;
+
+    border-radius: 8px;
+
+    padding: 12px;
+}
+
+.metric-label {
+    color: #64748b;
+
+    font-size: 10px;
+}
+
+.metric-value {
+    font-size: 18px;
+
+    font-weight: 700;
+
+    margin-top: 5px;
+}
+
+
+/* =========================================================
+   NOTES
+   ========================================================= */
+
+.note {
+    color: #64748b;
+
+    font-size: 12px;
+
+    margin-top: 8px;
+}
+
+
+/* =========================================================
+   NAV ICONS
+   ========================================================= */
+
+.nav-image-icon {
+    width: 20px;
+    height: 20px;
+
+    object-fit: contain;
+
+    flex-shrink: 0;
+}
+
+.nav-icon {
+    width: 20px;
+    min-width: 20px;
+
+    display: inline-flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    flex-shrink: 0;
+}
+
+
+/* =========================================================
+   GENERAL LINK TRANSITIONS
+   ========================================================= */
+
+a {
+    transition:
+        background 0.15s ease,
+        color 0.15s ease;
+}
+
+
+/* =========================================================
+   OTHER CARD TYPES
+   ========================================================= */
+
+.threshold-card,
+.policy-hero {
+    transition:
+        transform 0.15s ease,
+        box-shadow 0.15s ease;
+}
+
+
+/* =========================================================
+   RESPONSIVE — TABLET
+   ========================================================= */
+
+@media (max-width: 1000px) {
+
+    .sidebar {
+        width: 210px;
+    }
+
+    .main {
+        margin-left: 210px;
+        width: calc(100% - 210px);
+    }
+
+    .cards {
+        grid-template-columns:
+            repeat(2, 1fr);
+    }
+
+    .grid-2 {
+        grid-template-columns: 1fr;
+    }
+
+    .metric-row {
+        grid-template-columns:
+            repeat(2, 1fr);
+    }
+
+}
+
+
+/* =========================================================
+   RESPONSIVE — MOBILE
+   ========================================================= */
+
+@media (max-width: 700px) {
+
+    .sidebar {
+        position: static;
+
+        width: 100%;
+        height: auto;
+
+        max-height: none;
+
+        overflow: visible;
+
+        padding: 20px 12px;
+    }
+
+    .main {
+        margin-left: 0;
+
+        width: 100%;
+
+        padding: 20px;
+    }
+
+    .page-header {
+        align-items: flex-start;
+
+        flex-direction: column;
+    }
+
+    .status {
+        align-self: flex-start;
+    }
+
+    .cards {
+        grid-template-columns:
+            1fr;
+    }
+
+    .metric-row {
+        grid-template-columns:
+            1fr;
+    }
+
+}
+
+
+/* =========================================================
+   SMALL MOBILE
+   ========================================================= */
+
+@media (max-width: 450px) {
+
+    .main {
+        padding: 16px;
+    }
+
+    .page-title {
+        font-size: 23px;
+    }
+
+    .panel,
+    .card {
+        padding: 16px;
+    }
+
+    th,
+    td {
+        padding: 9px 6px;
+        font-size: 11px;
+    }
+
+}
+
+
+/* =========================================================
+   FINAL DASHBOARD GRID HEIGHT FIX
+   Keep Recent Risk Activity at its own content height.
+   ========================================================= */
+
+.grid-2 {
+    align-items: start !important;
+    grid-auto-rows: max-content !important;
+}
+
+.grid-2 > * {
+    align-self: start !important;
+    height: auto !important;
+    min-height: 0 !important;
+}
+
+.grid-2 > .panel:first-child {
+    align-self: start !important;
+    height: auto !important;
+    min-height: 0 !important;
+}
+
+/* Prevent chart wrappers/canvases from creating unnecessary
+   vertical space inside the left panel. */
+.grid-2 > .panel:first-child canvas {
+    max-height: 240px !important;
+}
+
+@media (max-width: 700px) {
+
+    .grid-2 {
+        grid-template-columns: 1fr !important;
+        grid-auto-rows: auto !important;
+    }
+
+    .grid-2 > * {
+        width: 100%;
+        height: auto !important;
+    }
+
+}

@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Sentinel — Regional Risk</title>
+
+    <link
+        rel="stylesheet"
+        href="../css/style.css"
+    >
+
+    <style>
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 18px;
+        }
+
+        .summary-card {
+            background: white;
+            border-radius: 14px;
+            padding: 18px;
+            box-shadow:
+                0 3px 14px
+                rgba(15, 23, 42, 0.06);
+        }
+
+        .summary-label {
+            color: #64748b;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: .4px;
+        }
+
+        .summary-value {
+            margin-top: 7px;
+            font-size: 28px;
+            font-weight: 800;
+        }
+
+        .panel {
+            background: white;
+            border-radius: 14px;
+            padding: 20px;
+            margin-bottom: 18px;
+            box-shadow:
+                0 3px 14px
+                rgba(15, 23, 42, 0.06);
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .panel-title {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 750;
+        }
+
+        .panel-subtitle {
+            color: #64748b;
+            font-size: 11px;
+            margin-top: 4px;
+        }
+
+        .region-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 14px;
+        }
+
+        .region-card {
+            border: 1px solid #e2e8f0;
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 17px;
+        }
+
+        .region-card.alert {
+            background: #fffafa;
+            border-color: #fecaca;
+        }
+
+        .region-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .region-name {
+            font-size: 16px;
+            font-weight: 800;
+        }
+
+        .region-meta {
+            color: #64748b;
+            font-size: 10px;
+            margin-top: 4px;
+        }
+
+        .region-metrics {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .metric {
+            background: white;
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        .metric-label {
+            color: #64748b;
+            font-size: 8px;
+            text-transform: uppercase;
+        }
+
+        .metric-value {
+            margin-top: 4px;
+            font-size: 15px;
+            font-weight: 750;
+        }
+
+        .risk-meter {
+            margin-top: 14px;
+            height: 9px;
+            background: #e2e8f0;
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        .risk-meter-fill {
+            height: 100%;
+            border-radius: 999px;
+        }
+
+        .low {
+            background: #22c55e;
+        }
+
+        .medium {
+            background: #f59e0b;
+        }
+
+        .high {
+            background: #f97316;
+        }
+
+        .critical {
+            background: #dc2626;
+        }
+
+        .alert-grid {
+            display: grid;
+            grid-template-columns: 1.25fr .75fr;
+            gap: 16px;
+        }
+
+        .alert-card {
+            border: 1px solid #fecaca;
+            background: #fffafa;
+            border-radius: 12px;
+            padding: 18px;
+        }
+
+        .alert-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .alert-title {
+            font-size: 18px;
+            font-weight: 800;
+        }
+
+        .alert-type {
+            color: #64748b;
+            font-size: 11px;
+            margin-top: 4px;
+        }
+
+        .alert-metrics {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .alert-metric {
+            background: white;
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        .alert-metric-label {
+            color: #64748b;
+            font-size: 8px;
+            text-transform: uppercase;
+        }
+
+        .alert-metric-value {
+            margin-top: 4px;
+            font-size: 14px;
+            font-weight: 750;
+        }
+
+        .simulation-note {
+            margin-top: 14px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            background: #fff7ed;
+            border: 1px solid #fed7aa;
+            color: #9a3412;
+            font-size: 10px;
+            line-height: 1.5;
+        }
+
+        .bar-chart {
+            display: flex;
+            align-items: end;
+            gap: 12px;
+            height: 230px;
+            padding: 15px 10px 8px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .bar-wrap {
+            flex: 1;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 6px;
+            min-width: 40px;
+        }
+
+        .bar {
+            width: 70%;
+            max-width: 55px;
+            min-height: 5px;
+            border-radius: 7px 7px 2px 2px;
+        }
+
+        .bar-value {
+            font-size: 10px;
+            font-weight: 750;
+            color: #475569;
+        }
+
+        .bar-label {
+            font-size: 9px;
+            color: #64748b;
+            text-align: center;
+            max-width: 90px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .empty {
+            padding: 35px;
+            text-align: center;
+            color: #94a3b8;
+            font-size: 12px;
+        }
+
+        .error {
+            padding: 14px;
+            border-radius: 9px;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+            font-size: 12px;
+        }
+
+        .button {
+            display: inline-block;
+            text-decoration: none;
+            border-radius: 8px;
+            padding: 9px 12px;
+            background: #2563eb;
+            color: white;
+            font-size: 11px;
+            font-weight: 650;
+        }
+
+        @media (max-width: 1050px) {
+
+            .summary-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .alert-grid {
+                grid-template-columns: 1fr;
+            }
+
+        }
+
+        @media (max-width: 750px) {
+
+            .region-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .alert-metrics {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+        }
+
+        @media (max-width: 550px) {
+
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .region-metrics {
+                grid-template-columns: 1fr;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body data-page="regional">
+
+
+<div class="app">
+
+    <aside
+        class="sidebar"
+        id="sidebar"
+    ></aside>
+
+
+    <main class="main">
+
+
+        <!-- =================================================
+             HEADER
+             ================================================= -->
+
+        <div class="page-header">
+
+            <div>
+
+                <h1 class="page-title">
+                    Regional Risk
+                </h1>
+
+                <div class="page-subtitle">
+                    Regional activity, concentration, and anomaly signals
+                </div>
+
+            </div>
+
+
+            <div class="status">
+
+                <span class="status-dot"></span>
+
+                Regional Monitoring
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             SUMMARY
+             ================================================= -->
+
+        <section class="summary-grid">
+
+            <div class="summary-card">
+
+                <div class="summary-label">
+                    Regions Observed
+                </div>
+
+                <div
+                    class="summary-value"
+                    id="regionCount"
+                >
+                    0
+                </div>
+
+            </div>
+
+
+            <div class="summary-card">
+
+                <div class="summary-label">
+                    Transactions
+                </div>
+
+                <div
+                    class="summary-value"
+                    id="transactionCount"
+                >
+                    0
+                </div>
+
+            </div>
+
+
+            <div class="summary-card">
+
+                <div class="summary-label">
+                    Highest Regional Risk
+                </div>
+
+                <div
+                    class="summary-value"
+                    id="highestRisk"
+                >
+                    0
+                </div>
+
+            </div>
+
+
+            <div class="summary-card">
+
+                <div class="summary-label">
+                    Active Regional Alerts
+                </div>
+
+                <div
+                    class="summary-value"
+                    id="alertCount"
+                >
+                    0
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             REGIONAL DISTRIBUTION
+             ================================================= -->
+
+        <section class="panel">
+
+            <div class="panel-header">
+
+                <div>
+
+                    <h2 class="panel-title">
+                        Regional Risk Distribution
+                    </h2>
+
+                    <div class="panel-subtitle">
+                        Calculated from transactions currently available to Sentinel
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div
+                id="regionGrid"
+                class="region-grid"
+            >
+
+                <div class="empty">
+                    Loading regional data...
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             REGIONAL RISK BAR CHART
+             ================================================= -->
+
+        <section class="panel">
+
+            <div class="panel-header">
+
+                <div>
+
+                    <h2 class="panel-title">
+                        Average Risk by Region
+                    </h2>
+
+                    <div class="panel-subtitle">
+                        Average transaction risk score, 0–100
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div
+                id="riskChart"
+                class="bar-chart"
+            ></div>
+
+        </section>
+
+
+        <!-- =================================================
+             ACTIVE REGIONAL ALERTS
+             ================================================= -->
+
+        <section class="panel">
+
+            <div class="panel-header">
+
+                <div>
+
+                    <h2 class="panel-title">
+                        Active Regional Alerts
+                    </h2>
+
+                    <div class="panel-subtitle">
+                        Incidents associated with regional anomalies
+                    </div>
+
+                </div>
+
+                <a
+                    class="button"
+                    href="incidents.html"
+                >
+                    View Incidents
+                </a>
+
+            </div>
+
+
+            <div id="alertContainer"></div>
+
+        </section>
+
+
+    </main>
+
+</div>
+
+
+<script src="../js/app.js?v=3"></script>
+
+
+<script>
+
+/* ============================================================
+   STATE
+   ============================================================ */
+
+let transactions = [];
+
+let incidents = [];
+
+
+/* ============================================================
+   LOAD
+   ============================================================ */
+
+async function loadRegionalData() {
+
+    try {
+
+        const [
+            transactionData,
+            incidentData
+        ] = await Promise.all([
+
+            api(
+                "/api/transactions/recent?limit=200"
+            ),
+
+            api(
+                "/api/incidents"
+            )
+
+        ]);
+
+
+        transactions =
+            transactionData.transactions || [];
+
+        incidents =
+            incidentData.incidents || [];
+
+
+        buildRegionalView();
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Regional Risk error:",
+            error
+        );
+
+
+        document.getElementById(
+            "regionGrid"
+        ).innerHTML = `
+            <div class="error">
+                Unable to load regional risk data.
+                <br><br>
+                ${error.message}
+            </div>
+        `;
+
+    }
+
+}
+
+
+/* ============================================================
+   BUILD REGIONAL VIEW
+   ============================================================ */
+
+function buildRegionalView() {
+
+    const groups = {};
+
+
+    for (
+        const tx of transactions
+    ) {
+
+        const region =
+            tx.region_key ||
+            "UNKNOWN";
+
+
+        if (!groups[region]) {
+
+            groups[region] = {
+
+                count: 0,
+
+                totalRisk: 0,
+
+                highRisk: 0,
+
+                amount: 0
+
+            };
+
+        }
+
+
+        groups[region].count++;
+
+        groups[region].totalRisk +=
+            Number(
+                tx.risk_score || 0
+            );
+
+        groups[region].amount +=
+            Number(
+                tx.amount || 0
+            );
+
+
+        if (
+            Number(
+                tx.risk_score || 0
+            ) >= 76
+        ) {
+
+            groups[region].highRisk++;
+
+        }
+
+    }
+
+
+    const regions =
+        Object.entries(
+            groups
+        )
+        .map(
+            (
+                [
+                    region,
+                    data
+                ]
+            ) => {
+
+                const averageRisk =
+                    data.count
+                        ? data.totalRisk /
+                          data.count
+                        : 0;
+
+
+                return {
+
+                    region,
+
+                    ...data,
+
+                    averageRisk
+
+                };
+
+            }
+        )
+        .sort(
+            (
+                a,
+                b
+            ) =>
+                b.averageRisk -
+                a.averageRisk
+        );
+
+
+    /* ========================================================
+       SUMMARY
+       ======================================================== */
+
+    document.getElementById(
+        "regionCount"
+    ).textContent =
+        regions.length;
+
+
+    document.getElementById(
+        "transactionCount"
+    ).textContent =
+        transactions.length;
+
+
+    document.getElementById(
+        "highestRisk"
+    ).textContent =
+        regions.length
+            ? regions[0].averageRisk.toFixed(2)
+            : "0";
+
+
+    const activeAlerts =
+        incidents.filter(
+            incident =>
+                incident.status === "OPEN"
+        );
+
+
+    document.getElementById(
+        "alertCount"
+    ).textContent =
+        activeAlerts.length;
+
+
+    renderRegions(
+        regions
+    );
+
+
+    renderChart(
+        regions
+    );
+
+
+    renderAlerts(
+        activeAlerts
+    );
+
+}
+
+
+/* ============================================================
+   REGIONAL CARDS
+   ============================================================ */
+
+function renderRegions(
+    regions
+) {
+
+    const container =
+        document.getElementById(
+            "regionGrid"
+        );
+
+
+    if (!regions.length) {
+
+        container.innerHTML = `
+            <div class="empty">
+                No regional transaction data available.
+            </div>
+        `;
+
+        return;
+    }
+
+
+    container.innerHTML =
+        regions
+            .map(
+                region => {
+
+                    const level =
+                        region.averageRisk >= 76
+                            ? "critical"
+                            : region.averageRisk >= 58
+                                ? "high"
+                                : region.averageRisk >= 30
+                                    ? "medium"
+                                    : "low";
+
+
+                    return `
+
+                        <div
+                            class="
+                                region-card
+                                ${
+                                    level === "critical" ||
+                                    level === "high"
+                                        ? "alert"
+                                        : ""
+                                }
+                            "
+                        >
+
+                            <div
+                                class="region-header"
+                            >
+
+                                <div>
+
+                                    <div
+                                        class="region-name"
+                                    >
+                                        ${
+                                            region.region
+                                        }
+                                    </div>
+
+                                    <div
+                                        class="region-meta"
+                                    >
+                                        ${
+                                            region.count
+                                        }
+                                        transaction${
+                                            region.count === 1
+                                                ? ""
+                                                : "s"
+                                        }
+                                    </div>
+
+                                </div>
+
+
+                                ${badge(
+                                    level.toUpperCase()
+                                )}
+
+                            </div>
+
+
+                            <div
+                                class="region-metrics"
+                            >
+
+                                <div class="metric">
+
+                                    <div
+                                        class="metric-label"
+                                    >
+                                        Avg Risk
+                                    </div>
+
+                                    <div
+                                        class="metric-value"
+                                    >
+                                        ${
+                                            region.averageRisk.toFixed(2)
+                                        }
+                                    </div>
+
+                                </div>
+
+
+                                <div class="metric">
+
+                                    <div
+                                        class="metric-label"
+                                    >
+                                        High Risk
+                                    </div>
+
+                                    <div
+                                        class="metric-value"
+                                    >
+                                        ${
+                                            region.highRisk
+                                        }
+                                    </div>
+
+                                </div>
+
+
+                                <div class="metric">
+
+                                    <div
+                                        class="metric-label"
+                                    >
+                                        Exposure
+                                    </div>
+
+                                    <div
+                                        class="metric-value"
+                                    >
+                                        ${
+                                            money(
+                                                region.amount
+                                            )
+                                        }
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="risk-meter">
+
+                                <div
+                                    class="
+                                        risk-meter-fill
+                                        ${level}
+                                    "
+                                    style="
+                                        width:${
+                                            Math.min(
+                                                100,
+                                                region.averageRisk
+                                            )
+                                        }%;
+                                    "
+                                ></div>
+
+                            </div>
+
+                        </div>
+
+                    `;
+
+                }
+            )
+            .join("");
+
+}
+
+
+/* ============================================================
+   BAR CHART
+   ============================================================ */
+
+function renderChart(
+    regions
+) {
+
+    const chart =
+        document.getElementById(
+            "riskChart"
+        );
+
+
+    if (!regions.length) {
+
+        chart.innerHTML = `
+            <div class="empty">
+                No chart data available.
+            </div>
+        `;
+
+        return;
+    }
+
+
+    const maxRisk =
+        Math.max(
+            100,
+            ...regions.map(
+                region =>
+                    region.averageRisk
+            )
+        );
+
+
+    chart.innerHTML =
+        regions
+            .slice(0, 8)
+            .map(
+                region => {
+
+                    const height =
+                        Math.max(
+                            5,
+                            (
+                                region.averageRisk /
+                                maxRisk
+                            ) * 100
+                        );
+
+
+                    const level =
+                        region.averageRisk >= 76
+                            ? "critical"
+                            : region.averageRisk >= 58
+                                ? "high"
+                                : region.averageRisk >= 30
+                                    ? "medium"
+                                    : "low";
+
+
+                    return `
+
+                        <div class="bar-wrap">
+
+                            <div class="bar-value">
+                                ${
+                                    region.averageRisk.toFixed(1)
+                                }
+                            </div>
+
+                            <div
+                                class="
+                                    bar
+                                    ${level}
+                                "
+                                style="
+                                    height:${height}%;
+                                "
+                            ></div>
+
+                            <div class="bar-label">
+                                ${
+                                    region.region
+                                }
+                            </div>
+
+                        </div>
+
+                    `;
+
+                }
+            )
+            .join("");
+
+}
+
+
+/* ============================================================
+   ALERTS
+   ============================================================ */
+
+function renderAlerts(
+    alerts
+) {
+
+    const container =
+        document.getElementById(
+            "alertContainer"
+        );
+
+
+    if (!alerts.length) {
+
+        container.innerHTML = `
+            <div class="empty">
+                No active regional alerts.
+            </div>
+        `;
+
+        return;
+    }
+
+
+    container.innerHTML =
+        alerts
+            .map(
+                incident => `
+
+                    <div class="alert-card">
+
+                        <div
+                            class="alert-heading"
+                        >
+
+                            <div>
+
+                                <div class="alert-title">
+                                    ${
+                                        incident.incident_id
+                                    }
+                                </div>
+
+                                <div class="alert-type">
+                                    ${
+                                        incident.incident_type
+                                    }
+                                </div>
+
+                            </div>
+
+
+                            ${badge(
+                                incident.severity
+                            )}
+
+                        </div>
+
+
+                        <div
+                            class="alert-metrics"
+                        >
+
+                            <div
+                                class="alert-metric"
+                            >
+
+                                <div
+                                    class="alert-metric-label"
+                                >
+                                    Region
+                                </div>
+
+                                <div
+                                    class="alert-metric-value"
+                                >
+                                    ${
+                                        incident.region_key
+                                    }
+                                </div>
+
+                            </div>
+
+
+                            <div
+                                class="alert-metric"
+                            >
+
+                                <div
+                                    class="alert-metric-label"
+                                >
+                                    Current Rate
+                                </div>
+
+                                <div
+                                    class="alert-metric-value"
+                                >
+                                    ${
+                                        (
+                                            Number(
+                                                incident.current_rate
+                                            ) * 100
+                                        ).toFixed(2)
+                                    }%
+                                </div>
+
+                            </div>
+
+
+                            <div
+                                class="alert-metric"
+                            >
+
+                                <div
+                                    class="alert-metric-label"
+                                >
+                                    Rate Ratio
+                                </div>
+
+                                <div
+                                    class="alert-metric-value"
+                                >
+                                    ${Number(
+                                        incident.rate_ratio
+                                    ).toFixed(1)}×
+                                </div>
+
+                            </div>
+
+
+                            <div
+                                class="alert-metric"
+                            >
+
+                                <div
+                                    class="alert-metric-label"
+                                >
+                                    Z-Score
+                                </div>
+
+                                <div
+                                    class="alert-metric-value"
+                                >
+                                    ${Number(
+                                        incident.z_score
+                                    ).toFixed(2)}
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        ${
+                            incident.source ===
+                            "CONTROLLED_SIMULATION"
+
+                            ? `
+                                <div
+                                    class="
+                                        simulation-note
+                                    "
+                                >
+                                    CONTROLLED SIMULATION —
+                                    This alert belongs to
+                                    Sentinel's generated
+                                    attack-stress scenario.
+                                </div>
+                            `
+                            : ""
+                        }
+
+
+                        <div
+                            style="
+                                margin-top:14px;
+                            "
+                        >
+
+                            <a
+                                class="button"
+                                href="#"
+                                onclick="
+                                    window.location.href =
+                                    'investigations.html?incident_id=' +
+                                    encodeURIComponent(
+                                        '${incident.incident_id}'
+                                    );
+                                    return false;
+                                "
+                            >
+                                Investigate
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                `
+            )
+            .join("");
+
+}
+
+
+/* ============================================================
+   INITIALIZE
+   ============================================================ */
+
+loadRegionalData();
+
+
+setInterval(
+    loadRegionalData,
+    10000
+);
+
+</script>
+
+</body>
+
+</html>

@@ -1,0 +1,1376 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Sentinel — Policy & Thresholds</title>
+
+    <link
+        rel="stylesheet"
+        href="../css/style.css"
+    >
+
+    <style>
+
+        .policy-hero {
+            background: white;
+            border-radius: 14px;
+            padding: 24px;
+            margin-bottom: 20px;
+
+            box-shadow:
+                0 3px 14px
+                rgba(15, 23, 42, 0.06);
+        }
+
+        .policy-status {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+        }
+
+        .policy-status h2 {
+            margin: 0;
+            font-size: 20px;
+        }
+
+        .validated {
+            background: #ecfdf5;
+            color: #166534;
+
+            padding: 7px 11px;
+
+            border-radius: 999px;
+
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .changed {
+            background: #fff7ed;
+            color: #9a3412;
+
+            padding: 7px 11px;
+
+            border-radius: 999px;
+
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .threshold-layout {
+            display: grid;
+
+            grid-template-columns:
+                1.5fr 1fr;
+
+            gap: 20px;
+        }
+
+        .threshold-card {
+            background: white;
+
+            border-radius: 14px;
+
+            padding: 24px;
+
+            box-shadow:
+                0 3px 14px
+                rgba(15, 23, 42, 0.06);
+        }
+
+        .threshold-item {
+            margin-bottom: 30px;
+        }
+
+        .threshold-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            margin-bottom: 10px;
+        }
+
+        .threshold-name {
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .threshold-value {
+            font-size: 24px;
+            font-weight: 800;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            cursor: pointer;
+        }
+
+        .range-labels {
+            display: flex;
+            justify-content: space-between;
+
+            color: #94a3b8;
+
+            font-size: 10px;
+
+            margin-top: 5px;
+        }
+
+        .risk-band {
+            margin-top: 20px;
+
+            height: 22px;
+
+            display: flex;
+
+            border-radius: 999px;
+
+            overflow: hidden;
+        }
+
+        .band-allow {
+            background: #22c55e;
+        }
+
+        .band-review {
+            background: #f59e0b;
+        }
+
+        .band-block {
+            background: #ef4444;
+        }
+
+        .band-labels {
+            display: flex;
+            justify-content: space-between;
+
+            margin-top: 9px;
+
+            font-size: 11px;
+
+            color: #64748b;
+        }
+
+        .impact-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            padding: 14px 0;
+
+            border-bottom:
+                1px solid #e5e7eb;
+        }
+
+        .impact-row:last-child {
+            border-bottom: none;
+        }
+
+        .impact-label {
+            color: #475569;
+            font-size: 13px;
+        }
+
+        .impact-number {
+            font-size: 22px;
+            font-weight: 800;
+        }
+
+        .impact-subtext {
+            color: #94a3b8;
+            font-size: 10px;
+            margin-top: 2px;
+        }
+
+        .preview-note {
+            margin-top: 16px;
+
+            padding: 13px;
+
+            border-radius: 8px;
+
+            background: #f8fafc;
+
+            color: #64748b;
+
+            font-size: 11px;
+
+            line-height: 1.5;
+        }
+
+        .policy-buttons {
+            display: flex;
+
+            gap: 10px;
+
+            margin-top: 22px;
+        }
+
+        .btn {
+            border: none;
+
+            padding: 10px 14px;
+
+            border-radius: 8px;
+
+            cursor: pointer;
+
+            font-weight: 650;
+
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #172033;
+        }
+
+        .btn-secondary:hover {
+            background: #dbe0e7;
+        }
+
+        .policy-summary {
+            display: grid;
+
+            grid-template-columns:
+                repeat(3, 1fr);
+
+            gap: 12px;
+        }
+
+        .summary-box {
+            background: #f8fafc;
+
+            padding: 14px;
+
+            border-radius: 9px;
+        }
+
+        .summary-label {
+            color: #64748b;
+
+            font-size: 10px;
+
+            text-transform: uppercase;
+
+            letter-spacing: 0.4px;
+        }
+
+        .summary-value {
+            font-size: 17px;
+
+            font-weight: 750;
+
+            margin-top: 5px;
+        }
+
+        .error-message {
+            color: #991b1b;
+
+            background: #fef2f2;
+
+            border: 1px solid #fecaca;
+        }
+
+        .success-message {
+            color: #166534;
+
+            background: #f0fdf4;
+
+            border: 1px solid #bbf7d0;
+        }
+
+        @media (max-width: 900px) {
+
+            .threshold-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .policy-summary {
+                grid-template-columns: 1fr;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body data-page="policy">
+
+
+<div class="app">
+
+
+    <!-- =====================================================
+         SIDEBAR
+         ===================================================== -->
+
+    <aside
+        class="sidebar"
+        id="sidebar"
+    ></aside>
+
+
+    <!-- =====================================================
+         MAIN
+         ===================================================== -->
+
+    <main class="main">
+
+
+        <!-- HEADER -->
+
+        <div class="page-header">
+
+            <div>
+
+                <h1 class="page-title">
+                    Policy & Thresholds
+                </h1>
+
+                <div class="page-subtitle">
+                    Configure Sentinel's automated risk decisions
+                </div>
+
+            </div>
+
+
+            <div class="status">
+
+                <span class="status-dot"></span>
+
+                Policy Engine Active
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             CURRENT POLICY
+             ================================================= -->
+
+        <div class="policy-hero">
+
+            <div class="policy-status">
+
+                <h2>
+                    Current Policy
+                </h2>
+
+                <span
+                    id="policyBadge"
+                    class="validated"
+                >
+                    LOADING
+                </span>
+
+            </div>
+
+
+            <div
+                id="currentPolicy"
+                style="
+                    color:#64748b;
+                    font-size:13px;
+                "
+            >
+                Loading policy...
+            </div>
+
+
+            <div
+                class="policy-summary"
+                style="margin-top:18px"
+            >
+
+                <div class="summary-box">
+
+                    <div class="summary-label">
+                        Allow
+                    </div>
+
+                    <div
+                        class="summary-value"
+                        id="summaryAllow"
+                    >
+                        —
+                    </div>
+
+                </div>
+
+
+                <div class="summary-box">
+
+                    <div class="summary-label">
+                        Review
+                    </div>
+
+                    <div
+                        class="summary-value"
+                        id="summaryReview"
+                    >
+                        —
+                    </div>
+
+                </div>
+
+
+                <div class="summary-box">
+
+                    <div class="summary-label">
+                        Block
+                    </div>
+
+                    <div
+                        class="summary-value"
+                        id="summaryBlock"
+                    >
+                        —
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             THRESHOLD AREA
+             ================================================= -->
+
+        <div class="threshold-layout">
+
+
+            <!-- =============================================
+                 LEFT — THRESHOLDS
+                 ============================================= -->
+
+            <div class="threshold-card">
+
+                <div class="panel-title">
+                    Decision Thresholds
+                </div>
+
+
+                <!-- ALLOW -->
+
+                <div class="threshold-item">
+
+                    <div class="threshold-header">
+
+                        <span class="threshold-name">
+                            Allow Threshold
+                        </span>
+
+                        <span
+                            class="threshold-value"
+                            id="allowValue"
+                        >
+                            0.58
+                        </span>
+
+                    </div>
+
+
+                    <input
+                        type="range"
+                        id="allowSlider"
+                        min="0.10"
+                        max="0.90"
+                        step="0.01"
+                        value="0.58"
+                    >
+
+
+                    <div class="range-labels">
+
+                        <span>
+                            0.10
+                        </span>
+
+                        <span>
+                            0.90
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <!-- BLOCK -->
+
+                <div class="threshold-item">
+
+                    <div class="threshold-header">
+
+                        <span class="threshold-name">
+                            Block Threshold
+                        </span>
+
+                        <span
+                            class="threshold-value"
+                            id="blockValue"
+                        >
+                            0.76
+                        </span>
+
+                    </div>
+
+
+                    <input
+                        type="range"
+                        id="blockSlider"
+                        min="0.20"
+                        max="0.99"
+                        step="0.01"
+                        value="0.76"
+                    >
+
+
+                    <div class="range-labels">
+
+                        <span>
+                            0.20
+                        </span>
+
+                        <span>
+                            0.99
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <!-- RISK BAND -->
+
+                <div class="panel-title">
+                    Risk Decision Bands
+                </div>
+
+
+                <div class="risk-band">
+
+                    <div
+                        class="band-allow"
+                        id="allowBand"
+                    ></div>
+
+                    <div
+                        class="band-review"
+                        id="reviewBand"
+                    ></div>
+
+                    <div
+                        class="band-block"
+                        id="blockBand"
+                    ></div>
+
+                </div>
+
+
+                <div class="band-labels">
+
+                    <span>
+                        ALLOW
+                    </span>
+
+                    <span>
+                        REVIEW
+                    </span>
+
+                    <span>
+                        BLOCK
+                    </span>
+
+                </div>
+
+
+                <!-- BUTTONS -->
+
+                <div class="policy-buttons">
+
+                    <button
+                        class="btn btn-secondary"
+                        id="resetButton"
+                    >
+                        Reset Validated
+                    </button>
+
+
+                    <button
+                        class="btn btn-primary"
+                        id="applyButton"
+                    >
+                        Apply Policy
+                    </button>
+
+                </div>
+
+
+                <!-- MESSAGE -->
+
+                <div
+                    class="preview-note"
+                    id="policyMessage"
+                >
+                    Move the thresholds to preview policy impact.
+                    Click Apply Policy to save the changes.
+                </div>
+
+            </div>
+
+
+            <!-- =============================================
+                 RIGHT — IMPACT PREVIEW
+                 ============================================= -->
+
+            <div class="threshold-card">
+
+                <div class="panel-title">
+                    Policy Impact Preview
+                </div>
+
+
+                <div class="impact-row">
+
+                    <div>
+
+                        <div class="impact-label">
+                            Allow
+                        </div>
+
+                        <div class="impact-subtext">
+                            Low-risk transactions
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        class="impact-number"
+                        id="impactAllow"
+                    >
+                        —
+                    </div>
+
+                </div>
+
+
+                <div class="impact-row">
+
+                    <div>
+
+                        <div class="impact-label">
+                            Review
+                        </div>
+
+                        <div class="impact-subtext">
+                            Human verification
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        class="impact-number"
+                        id="impactReview"
+                    >
+                        —
+                    </div>
+
+                </div>
+
+
+                <div class="impact-row">
+
+                    <div>
+
+                        <div class="impact-label">
+                            Block
+                        </div>
+
+                        <div class="impact-subtext">
+                            High-risk action
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        class="impact-number"
+                        id="impactBlock"
+                    >
+                        —
+                    </div>
+
+                </div>
+
+
+                <div class="preview-note">
+
+                    Preview uses the transactions currently
+                    stored in Sentinel. Changing the policy
+                    does not retrain the ML model.
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+</div>
+
+
+<!-- =========================================================
+     SHARED APP
+     ========================================================= -->
+
+<script src="../js/app.js?v=3"></script>
+
+
+<script>
+
+const VALIDATED_ALLOW = 0.58;
+
+const VALIDATED_BLOCK = 0.76;
+
+let transactions = [];
+
+
+/* ============================================================
+   ELEMENTS
+   ============================================================ */
+
+const allowSlider =
+    document.getElementById(
+        "allowSlider"
+    );
+
+const blockSlider =
+    document.getElementById(
+        "blockSlider"
+    );
+
+const allowValue =
+    document.getElementById(
+        "allowValue"
+    );
+
+const blockValue =
+    document.getElementById(
+        "blockValue"
+    );
+
+const allowBand =
+    document.getElementById(
+        "allowBand"
+    );
+
+const reviewBand =
+    document.getElementById(
+        "reviewBand"
+    );
+
+const blockBand =
+    document.getElementById(
+        "blockBand"
+    );
+
+const policyBadge =
+    document.getElementById(
+        "policyBadge"
+    );
+
+const currentPolicy =
+    document.getElementById(
+        "currentPolicy"
+    );
+
+const policyMessage =
+    document.getElementById(
+        "policyMessage"
+    );
+
+const impactAllow =
+    document.getElementById(
+        "impactAllow"
+    );
+
+const impactReview =
+    document.getElementById(
+        "impactReview"
+    );
+
+const impactBlock =
+    document.getElementById(
+        "impactBlock"
+    );
+
+const summaryAllow =
+    document.getElementById(
+        "summaryAllow"
+    );
+
+const summaryReview =
+    document.getElementById(
+        "summaryReview"
+    );
+
+const summaryBlock =
+    document.getElementById(
+        "summaryBlock"
+    );
+
+
+/* ============================================================
+   LOAD POLICY
+   ============================================================ */
+
+async function loadPolicy() {
+
+    try {
+
+        const data =
+            await api("/api/policy");
+
+        const policy =
+            data.policy;
+
+        allowSlider.value =
+            policy.allow_threshold;
+
+        blockSlider.value =
+            policy.block_threshold;
+
+        updateUI();
+
+        updateCurrentPolicy(
+            policy.allow_threshold,
+            policy.block_threshold
+        );
+
+    }
+
+    catch (error) {
+
+        console.error(error);
+
+        policyMessage.textContent =
+            "Unable to load the current policy.";
+
+        policyMessage.className =
+            "preview-note error-message";
+
+    }
+
+}
+
+
+/* ============================================================
+   LOAD TRANSACTIONS
+   ============================================================ */
+
+async function loadTransactions() {
+
+    try {
+
+        const data =
+            await api(
+                "/api/transactions/recent?limit=200"
+            );
+
+        transactions =
+            data.transactions || [];
+
+        updateImpact();
+
+    }
+
+    catch (error) {
+
+        console.error(error);
+
+    }
+
+}
+
+
+/* ============================================================
+   DISPLAY CURRENT POLICY
+   ============================================================ */
+
+function updateCurrentPolicy(
+    allow,
+    block
+) {
+
+    currentPolicy.innerHTML = `
+        <strong>ALLOW</strong>
+        &nbsp; < ${allow.toFixed(2)}
+
+        &nbsp;&nbsp; | &nbsp;&nbsp;
+
+        <strong>REVIEW</strong>
+        &nbsp;
+        ${allow.toFixed(2)}
+        →
+        ${block.toFixed(2)}
+
+        &nbsp;&nbsp; | &nbsp;&nbsp;
+
+        <strong>BLOCK</strong>
+        &nbsp; ≥ ${block.toFixed(2)}
+    `;
+
+    summaryAllow.textContent =
+        `< ${allow.toFixed(2)}`;
+
+    summaryReview.textContent =
+        `${allow.toFixed(2)} → ${block.toFixed(2)}`;
+
+    summaryBlock.textContent =
+        `≥ ${block.toFixed(2)}`;
+}
+
+
+/* ============================================================
+   UPDATE VISUAL UI
+   ============================================================ */
+
+function updateUI() {
+
+    const allow =
+        Number(
+            allowSlider.value
+        );
+
+    const block =
+        Number(
+            blockSlider.value
+        );
+
+
+    allowValue.textContent =
+        allow.toFixed(2);
+
+    blockValue.textContent =
+        block.toFixed(2);
+
+
+    /*
+     * Risk band widths.
+     */
+
+    const allowWidth =
+        allow * 100;
+
+    const reviewWidth =
+        Math.max(
+            0,
+            (block - allow) * 100
+        );
+
+    const blockWidth =
+        Math.max(
+            0,
+            (1 - block) * 100
+        );
+
+
+    allowBand.style.width =
+        `${allowWidth}%`;
+
+    reviewBand.style.width =
+        `${reviewWidth}%`;
+
+    blockBand.style.width =
+        `${blockWidth}%`;
+
+
+    /*
+     * Validated vs modified.
+     */
+
+    const matchesValidated =
+        Math.abs(
+            allow - VALIDATED_ALLOW
+        ) < 0.001
+        &&
+        Math.abs(
+            block - VALIDATED_BLOCK
+        ) < 0.001;
+
+
+    if (matchesValidated) {
+
+        policyBadge.className =
+            "validated";
+
+        policyBadge.textContent =
+            "VALIDATED BASELINE";
+
+    }
+
+    else {
+
+        policyBadge.className =
+            "changed";
+
+        policyBadge.textContent =
+            "UNVALIDATED CHANGE";
+
+    }
+
+
+    updateCurrentPolicy(
+        allow,
+        block
+    );
+
+    updateImpact();
+}
+
+
+/* ============================================================
+   POLICY IMPACT
+   ============================================================ */
+
+function updateImpact() {
+
+    if (!transactions.length) {
+
+        impactAllow.textContent = "—";
+        impactReview.textContent = "—";
+        impactBlock.textContent = "—";
+
+        return;
+    }
+
+
+    const allow =
+        Number(
+            allowSlider.value
+        );
+
+    const block =
+        Number(
+            blockSlider.value
+        );
+
+
+    let allowCount = 0;
+
+    let reviewCount = 0;
+
+    let blockCount = 0;
+
+
+    for (
+        const transaction of transactions
+    ) {
+
+        const risk =
+            Number(
+                transaction.risk_score
+            ) / 100;
+
+
+        if (risk < allow) {
+
+            allowCount++;
+
+        }
+
+        else if (risk < block) {
+
+            reviewCount++;
+
+        }
+
+        else {
+
+            blockCount++;
+
+        }
+
+    }
+
+
+    impactAllow.textContent =
+        allowCount;
+
+    impactReview.textContent =
+        reviewCount;
+
+    impactBlock.textContent =
+        blockCount;
+}
+
+
+/* ============================================================
+   KEEP THRESHOLDS VALID
+   ============================================================ */
+
+allowSlider.addEventListener(
+    "input",
+    () => {
+
+        const block =
+            Number(
+                blockSlider.value
+            );
+
+        let allow =
+            Number(
+                allowSlider.value
+            );
+
+
+        if (allow >= block) {
+
+            allow =
+                Math.max(
+                    0.10,
+                    block - 0.01
+                );
+
+            allowSlider.value =
+                allow;
+        }
+
+
+        updateUI();
+    }
+);
+
+
+blockSlider.addEventListener(
+    "input",
+    () => {
+
+        const allow =
+            Number(
+                allowSlider.value
+            );
+
+        let block =
+            Number(
+                blockSlider.value
+            );
+
+
+        if (block <= allow) {
+
+            block =
+                Math.min(
+                    0.99,
+                    allow + 0.01
+                );
+
+            blockSlider.value =
+                block;
+        }
+
+
+        updateUI();
+    }
+);
+
+
+/* ============================================================
+   RESET
+   ============================================================ */
+
+document
+    .getElementById("resetButton")
+    .addEventListener(
+        "click",
+        async () => {
+
+            allowSlider.value =
+                VALIDATED_ALLOW;
+
+            blockSlider.value =
+                VALIDATED_BLOCK;
+
+            updateUI();
+
+            policyMessage.textContent =
+                "Validated baseline restored in preview. Click Apply Policy to save it.";
+
+            policyMessage.className =
+                "preview-note";
+        }
+    );
+
+
+/* ============================================================
+   APPLY POLICY
+   ============================================================ */
+
+document
+    .getElementById("applyButton")
+    .addEventListener(
+        "click",
+        async () => {
+
+            const allow =
+                Number(
+                    allowSlider.value
+                );
+
+            const block =
+                Number(
+                    blockSlider.value
+                );
+
+
+            if (allow >= block) {
+
+                policyMessage.textContent =
+                    "Invalid policy: Allow threshold must be lower than Block threshold.";
+
+                policyMessage.className =
+                    "preview-note error-message";
+
+                return;
+            }
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        API + "/api/policy",
+                        {
+                            method: "PUT",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+
+                            body: JSON.stringify({
+                                allow_threshold:
+                                    allow,
+
+                                block_threshold:
+                                    block
+                            })
+                        }
+                    );
+
+
+                if (!response.ok) {
+
+                    let error = {};
+
+                    try {
+                        error =
+                            await response.json();
+                    }
+
+                    catch (_) {}
+
+                    throw new Error(
+                        error.detail ||
+                        "Policy update failed."
+                    );
+                }
+
+
+                const result =
+                    await response.json();
+
+                const updatedPolicy =
+                    result.policy;
+
+
+                allowSlider.value =
+                    updatedPolicy.allow_threshold;
+
+                blockSlider.value =
+                    updatedPolicy.block_threshold;
+
+
+                updateUI();
+
+
+                policyMessage.textContent =
+                    `Policy applied successfully. Allow < ${updatedPolicy.allow_threshold.toFixed(2)} and Block ≥ ${updatedPolicy.block_threshold.toFixed(2)}.`;
+
+                policyMessage.className =
+                    "preview-note success-message";
+
+
+                policyBadge.className =
+                    "validated";
+
+                policyBadge.textContent =
+                    "ACTIVE POLICY";
+
+            }
+
+            catch (error) {
+
+                console.error(error);
+
+                policyMessage.textContent =
+                    error.message;
+
+                policyMessage.className =
+                    "preview-note error-message";
+
+            }
+
+        }
+    );
+
+
+/* ============================================================
+   INITIALIZE
+   ============================================================ */
+
+async function initPolicyPage() {
+
+    await loadPolicy();
+
+    await loadTransactions();
+
+    updateUI();
+
+}
+
+
+initPolicyPage();
+
+</script>
+
+</body>
+
+</html>

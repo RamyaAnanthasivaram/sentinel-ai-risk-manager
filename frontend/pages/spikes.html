@@ -1,0 +1,1308 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Sentinel — Fraud Spikes</title>
+
+    <link
+        rel="stylesheet"
+        href="../css/style.css"
+    >
+
+    <style>
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 18px;
+        }
+
+        .summary-card {
+            background: white;
+            border-radius: 14px;
+            padding: 18px;
+            box-shadow:
+                0 3px 14px
+                rgba(15, 23, 42, 0.06);
+        }
+
+        .summary-label {
+            color: #64748b;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: .4px;
+        }
+
+        .summary-value {
+            margin-top: 7px;
+            font-size: 28px;
+            font-weight: 800;
+        }
+
+        .panel {
+            background: white;
+            border-radius: 14px;
+            padding: 20px;
+            margin-bottom: 18px;
+            box-shadow:
+                0 3px 14px
+                rgba(15, 23, 42, 0.06);
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 17px;
+        }
+
+        .panel-title {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 750;
+        }
+
+        .panel-subtitle {
+            color: #64748b;
+            font-size: 11px;
+            margin-top: 4px;
+        }
+
+        .spike-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .spike-card {
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 17px;
+            background: #f8fafc;
+        }
+
+        .spike-card.high {
+            border-color: #fecaca;
+            background: #fffafa;
+        }
+
+        .spike-card.medium {
+            border-color: #fde68a;
+            background: #fffbeb;
+        }
+
+        .spike-card.critical {
+            border-color: #fecaca;
+            background: #fffafa;
+        }
+
+        .regional-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .regional-card {
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 17px;
+            background: #f8fafc;
+        }
+
+        .regional-card.medium {
+            border-color: #fde68a;
+            background: #fffbeb;
+        }
+
+        .regional-card.high,
+        .regional-card.critical {
+            border-color: #fecaca;
+            background: #fffafa;
+        }
+
+        .regional-card .spike-metrics {
+            grid-template-columns: repeat(4, 1fr);
+        }
+
+        .source-live {
+            border: 1px solid #bbf7d0;
+            background: #f0fdf4;
+            color: #166534;
+        }
+
+        .spike-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 15px;
+        }
+
+        .time-bin {
+            font-size: 17px;
+            font-weight: 800;
+        }
+
+        .scope {
+            color: #64748b;
+            font-size: 10px;
+            margin-top: 4px;
+        }
+
+        .spike-metrics {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 9px;
+            margin-top: 16px;
+        }
+
+        .metric {
+            background: white;
+            border-radius: 8px;
+            padding: 11px;
+        }
+
+        .metric-label {
+            color: #64748b;
+            font-size: 8px;
+            text-transform: uppercase;
+        }
+
+        .metric-value {
+            margin-top: 4px;
+            font-size: 14px;
+            font-weight: 750;
+        }
+
+        .z-score {
+            font-size: 19px;
+        }
+
+        .severity-high {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 6px 9px;
+            border-radius: 999px;
+            font-size: 10px;
+            font-weight: 750;
+        }
+
+        .severity-medium {
+            background: #fef3c7;
+            color: #92400e;
+            padding: 6px 9px;
+            border-radius: 999px;
+            font-size: 10px;
+            font-weight: 750;
+        }
+
+        .chart {
+            height: 270px;
+            display: flex;
+            align-items: end;
+            gap: 70px;
+            justify-content: center;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 15px 40px 0;
+        }
+
+        .chart-column {
+            height: 100%;
+            width: 130px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: end;
+            gap: 7px;
+        }
+
+        .chart-value {
+            font-size: 12px;
+            font-weight: 750;
+            color: #334155;
+        }
+
+        .chart-bar {
+            width: 65px;
+            min-height: 8px;
+            border-radius: 8px 8px 2px 2px;
+        }
+
+        .chart-bar.high {
+            background: #dc2626;
+        }
+
+        .chart-bar.medium {
+            background: #f59e0b;
+        }
+
+        .chart-label {
+            font-size: 10px;
+            color: #64748b;
+        }
+
+        .source-note {
+            margin-top: 16px;
+            padding: 11px 13px;
+            background: #f8fafc;
+            border-radius: 8px;
+            color: #64748b;
+            font-size: 10px;
+            line-height: 1.5;
+        }
+
+        .empty {
+            padding: 38px;
+            text-align: center;
+            color: #94a3b8;
+            font-size: 12px;
+        }
+
+        .error {
+            padding: 14px;
+            border-radius: 9px;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+            font-size: 12px;
+        }
+
+        @media (max-width: 1050px) {
+
+            .summary-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .spike-metrics {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+        }
+
+        @media (max-width: 650px) {
+
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .spike-metrics {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .chart {
+                gap: 20px;
+                padding-left: 5px;
+                padding-right: 5px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body data-page="spikes">
+
+
+<div class="app">
+
+    <aside
+        class="sidebar"
+        id="sidebar"
+    ></aside>
+
+
+    <main class="main">
+
+
+        <!-- =================================================
+             HEADER
+             ================================================= -->
+
+        <div class="page-header">
+
+            <div>
+
+                <h1 class="page-title">
+                    Fraud Spikes
+                </h1>
+
+                <div class="page-subtitle">
+                    Live anomaly windows from Sentinel's risk pipeline
+                </div>
+
+            </div>
+
+
+            <div class="status">
+
+                <span class="status-dot"></span>
+
+                Spike Monitoring
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             SUMMARY
+             ================================================= -->
+
+        <section class="summary-grid">
+
+            <div class="summary-card">
+
+                <div class="summary-label">
+                    Confirmed Spikes
+                </div>
+
+                <div
+                    class="summary-value"
+                    id="confirmed"
+                >
+                    —
+                </div>
+
+            </div>
+
+
+            <div class="summary-card">
+
+                <div class="summary-label">
+                    High Severity
+                </div>
+
+                <div
+                    class="summary-value"
+                    id="high"
+                >
+                    —
+                </div>
+
+            </div>
+
+
+            <div class="summary-card">
+
+                <div class="summary-label">
+                    Medium Severity
+                </div>
+
+                <div
+                    class="summary-value"
+                    id="medium"
+                >
+                    —
+                </div>
+
+            </div>
+
+
+            <div class="summary-card">
+
+                <div class="summary-label">
+                    Maximum Z-Score
+                </div>
+
+                <div
+                    class="summary-value"
+                    id="maxZ"
+                >
+                    —
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             CHART
+             ================================================= -->
+
+        <section class="panel">
+
+            <div class="panel-header">
+
+                <div>
+
+                    <h2 class="panel-title">
+                        Spike Significance
+                    </h2>
+
+                    <div class="panel-subtitle">
+                        Z-score of confirmed global anomaly windows
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div
+                class="chart"
+                id="chart"
+            >
+                <div class="empty">
+                    Loading spike data...
+                </div>
+            </div>
+
+
+            <div class="source-note">
+                These records are the confirmed results from the
+                Sentinel anomaly pipeline previously executed for
+                this project. They are presented as historical
+                pipeline results, not as a newly recalculated live
+                detection.
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             SPIKE DETAILS
+             ================================================= -->
+
+        <section class="panel">
+
+            <div class="panel-header">
+
+                <div>
+
+                    <h2 class="panel-title">
+                        Confirmed Global Spikes
+                    </h2>
+
+                    <div class="panel-subtitle">
+                        Detailed anomaly evidence
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div
+                class="spike-list"
+                id="spikeList"
+            >
+                <div class="empty">
+                    Loading spikes...
+                </div>
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             REGIONAL
+             ================================================= -->
+
+        <section class="panel">
+
+            <div class="panel-header">
+
+                <div>
+
+                    <h2 class="panel-title">
+                        Regional Anomaly Windows
+                    </h2>
+
+                    <div class="panel-subtitle">
+                        Live regional detector results from the current transaction stream
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div
+                class="regional-list"
+                id="regionalList"
+            >
+                <div class="empty">
+                    Loading regional anomaly windows...
+                </div>
+            </div>
+
+        </section>
+
+
+    </main>
+
+</div>
+
+
+<script src="../js/app.js?v=3"></script>
+
+
+<script>
+
+/* ============================================================
+   LOAD SPIKES
+   ============================================================ */
+
+async function loadSpikes() {
+
+    try {
+
+        const [
+            spikeData,
+            summary
+        ] = await Promise.all([
+
+            api(
+                "/api/spikes"
+            ),
+
+            api(
+                "/api/spikes/summary"
+            )
+
+        ]);
+
+
+        const spikes =
+            spikeData.spikes || [];
+
+
+        const regionalWindows =
+            spikeData.regional_anomaly_windows
+            ||
+            spikeData.regional_anomalies
+            ||
+            [];
+
+
+        /* ====================================================
+           SUMMARY
+           ==================================================== */
+
+        document.getElementById(
+            "confirmed"
+        ).textContent =
+            summary.confirmed_spikes ??
+            spikes.length;
+
+
+        document.getElementById(
+            "high"
+        ).textContent =
+            summary.high_severity ??
+            0;
+
+
+        document.getElementById(
+            "medium"
+        ).textContent =
+            summary.medium_severity ??
+            0;
+
+
+        const maxZ =
+            summary.max_z_score ??
+            summary.maximum_z_score ??
+            0;
+
+
+        document.getElementById(
+            "maxZ"
+        ).textContent =
+            Number(
+                maxZ
+            ).toFixed(2);
+
+
+        renderChart(
+            spikes
+        );
+
+
+        renderSpikes(
+            spikes
+        );
+
+
+        renderRegionalWindows(
+            regionalWindows
+        );
+
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Spike API error:",
+            error
+        );
+
+
+        document.getElementById(
+            "spikeList"
+        ).innerHTML = `
+            <div class="error">
+                Unable to load fraud spike data.
+                <br><br>
+                ${error.message}
+            </div>
+        `;
+
+
+        document.getElementById(
+            "regionalList"
+        ).innerHTML = `
+            <div class="error">
+                Unable to load regional anomaly data.
+                <br><br>
+                ${error.message}
+            </div>
+        `;
+
+    }
+
+}
+
+
+
+/* ============================================================
+   CHART
+   ============================================================ */
+
+function renderChart(
+    spikes
+) {
+
+    const chart =
+        document.getElementById(
+            "chart"
+        );
+
+
+    if (!spikes.length) {
+
+        chart.innerHTML = `
+            <div class="empty">
+                No confirmed spike data available.
+            </div>
+        `;
+
+        return;
+    }
+
+
+    const maxZ =
+        Math.max(
+            ...spikes.map(
+                spike =>
+                    Number(
+                        spike.z_score
+                    )
+            )
+        );
+
+
+    chart.innerHTML =
+        spikes
+            .map(
+                spike => {
+
+                    const z =
+                        Number(
+                            spike.z_score
+                        );
+
+
+                    const height =
+                        Math.max(
+                            8,
+                            (
+                                z /
+                                maxZ
+                            ) * 85
+                        );
+
+
+                    const severity =
+                        String(
+                            spike.severity
+                        ).toLowerCase();
+
+
+                    return `
+
+                        <div
+                            class="chart-column"
+                        >
+
+                            <div
+                                class="chart-value"
+                            >
+                                ${z.toFixed(2)}σ
+                            </div>
+
+                            <div
+                                class="
+                                    chart-bar
+                                    ${severity}
+                                "
+                                style="
+                                    height:${height}%;
+                                "
+                            ></div>
+
+                            <div
+                                class="chart-label"
+                            >
+                                Time bin
+                                ${spike.time_bin}
+                            </div>
+
+                        </div>
+
+                    `;
+
+                }
+            )
+            .join("");
+
+}
+
+
+/* ============================================================
+   SPIKE CARDS
+   ============================================================ */
+
+function renderSpikes(
+    spikes
+) {
+
+    const container =
+        document.getElementById(
+            "spikeList"
+        );
+
+
+    if (!spikes.length) {
+
+        container.innerHTML = `
+            <div class="empty">
+                No confirmed spikes.
+            </div>
+        `;
+
+        return;
+    }
+
+
+    container.innerHTML =
+        spikes
+            .map(
+                spike => {
+
+                    const severity =
+                        String(
+                            spike.severity
+                        ).toLowerCase();
+
+
+                    return `
+
+                        <article
+                            class="
+                                spike-card
+                                ${severity}
+                            "
+                        >
+
+                            <div
+                                class="spike-header"
+                            >
+
+                                <div>
+
+                                    <div
+                                        class="time-bin"
+                                    >
+                                        Time Bin
+                                        ${spike.time_bin}
+                                    </div>
+
+                                    <div
+                                        class="scope"
+                                    >
+                                        ${
+                                            spike.spike_scope ||
+                                            spike.scope ||
+                                            "GLOBAL"
+                                        }
+                                    </div>
+
+                                </div>
+
+
+                                <span
+                                    class="
+                                        severity-${severity}
+                                    "
+                                >
+                                    ${
+                                        spike.severity
+                                    }
+                                </span>
+
+                            </div>
+
+
+                            <div
+                                class="spike-metrics"
+                            >
+
+                                <div class="metric">
+
+                                    <div
+                                        class="metric-label"
+                                    >
+                                        Transactions
+                                    </div>
+
+                                    <div
+                                        class="metric-value"
+                                    >
+                                        ${
+                                            Number(
+                                                spike.transactions
+                                            ).toLocaleString(
+                                                "en-IN"
+                                            )
+                                        }
+                                    </div>
+
+                                </div>
+
+
+                                <div class="metric">
+
+                                    <div
+                                        class="metric-label"
+                                    >
+                                        High-Risk Rate
+                                    </div>
+
+                                    <div
+                                        class="metric-value"
+                                    >
+                                        ${Number(
+                                            spike.high_risk_rate
+                                        ).toFixed(2)}
+                                    </div>
+
+                                </div>
+
+
+                                <div class="metric">
+
+                                    <div
+                                        class="metric-label"
+                                    >
+                                        Rate Increase
+                                    </div>
+
+                                    <div
+                                        class="metric-value"
+                                    >
+                                        ${Number(
+                                            spike.rate_increase
+                                        ).toFixed(6)}
+                                    </div>
+
+                                </div>
+
+
+                                <div class="metric">
+
+                                    <div
+                                        class="metric-label"
+                                    >
+                                        Z-Score
+                                    </div>
+
+                                    <div
+                                        class="
+                                            metric-value
+                                            z-score
+                                        "
+                                    >
+                                        ${Number(
+                                            spike.z_score
+                                        ).toFixed(6)}σ
+                                    </div>
+
+                                </div>
+
+
+                                <div class="metric">
+
+                                    <div
+                                        class="metric-label"
+                                    >
+                                        Source
+                                    </div>
+
+                                    <div
+                                        class="metric-value"
+                                        style="font-size:10px"
+                                    >
+                                        ${
+                                            spike.source
+                                        }
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </article>
+
+                    `;
+
+                }
+            )
+            .join("");
+
+}
+
+
+/* ============================================================
+   REGIONAL ANOMALY WINDOWS
+   ============================================================ */
+
+function renderRegionalWindows(
+    windows
+) {
+
+    const container =
+        document.getElementById(
+            "regionalList"
+        );
+
+
+    if (!windows.length) {
+
+        container.innerHTML = `
+            <div class="empty">
+                No regional anomaly windows detected in
+                the current transaction stream.
+                <br><br>
+                New transactions can create live regional
+                anomaly windows automatically.
+            </div>
+        `;
+
+        return;
+    }
+
+
+    container.innerHTML =
+        windows
+            .map(
+                item => {
+
+                    const severity =
+                        String(
+                            item.severity ||
+                            "MEDIUM"
+                        ).toLowerCase();
+
+
+                    const currentRisk =
+                        Number(
+                            item.current_avg_risk ??
+                            item.current_risk ??
+                            0
+                        );
+
+
+                    const baselineRisk =
+                        Number(
+                            item.baseline_avg_risk ??
+                            item.baseline_risk ??
+                            0
+                        );
+
+
+                    const anomalyScore =
+                        Number(
+                            item.regional_anomaly_score ??
+                            item.anomaly_score ??
+                            0
+                        );
+
+
+                    const zScore =
+                        Number(
+                            item.z_score ??
+                            0
+                        );
+
+
+                    const currentRate =
+                        Number(
+                            item.current_high_risk_rate ??
+                            0
+                        );
+
+
+                    const baselineRate =
+                        Number(
+                            item.baseline_high_risk_rate ??
+                            0
+                        );
+
+
+                    return `
+
+                        <article
+                            class="
+                                regional-card
+                                ${severity}
+                            "
+                        >
+
+                            <div
+                                class="spike-header"
+                            >
+
+                                <div>
+
+                                    <div
+                                        class="time-bin"
+                                    >
+                                        Time Bin
+                                        ${item.time_bin ?? "—"}
+                                    </div>
+
+                                    <div
+                                        class="scope"
+                                    >
+                                        ${
+                                            item.region_key ||
+                                            item.region ||
+                                            "UNKNOWN REGION"
+                                        }
+                                    </div>
+
+                                </div>
+
+
+                                <span
+                                    class="
+                                        severity-${severity}
+                                    "
+                                >
+                                    ${
+                                        (
+                                            item.severity ||
+                                            "MEDIUM"
+                                        )
+                                    }
+                                </span>
+
+                            </div>
+
+
+                            <div
+                                class="spike-metrics"
+                            >
+
+                                <div class="metric">
+
+                                    <div
+                                        class="metric-label"
+                                    >
+                                        Transactions
+                                    </div>
+
+                                    <div
+                                        class="metric-value"
+                                    >
+                                        ${
+                                            Number(
+                                                item.transactions ||
+                                                0
+                                            ).toLocaleString(
+                                                "en-IN"
+                                            )
+                                        }
+                                    </div>
+
+                                </div>
+
+
+                                <div class="metric">
+
+                                    <div
+                                        class="metric-label"
+                                    >
+                                        Baseline Avg Risk
+                                    </div>
+
+                                    <div
+                                        class="metric-value"
+                                    >
+                                        ${baselineRisk.toFixed(2)}
+                                    </div>
+
+                                </div>
+
+
+                                <div class="metric">
+
+                                    <div
+                                        class="metric-label"
+                                    >
+                                        Current Avg Risk
+                                    </div>
+
+                                    <div
+                                        class="metric-value"
+                                    >
+                                        ${currentRisk.toFixed(2)}
+                                    </div>
+
+                                </div>
+
+
+                                <div class="metric">
+
+                                    <div
+                                        class="metric-label"
+                                    >
+                                        Anomaly Score
+                                    </div>
+
+                                    <div
+                                        class="
+                                            metric-value
+                                            z-score
+                                        "
+                                    >
+                                        ${anomalyScore.toFixed(2)}
+                                    </div>
+
+                                </div>
+
+
+                                <div class="metric">
+
+                                    <div
+                                        class="metric-label"
+                                    >
+                                        Baseline High-Risk
+                                    </div>
+
+                                    <div
+                                        class="metric-value"
+                                    >
+                                        ${(baselineRate * 100).toFixed(1)}%
+                                    </div>
+
+                                </div>
+
+
+                                <div class="metric">
+
+                                    <div
+                                        class="metric-label"
+                                    >
+                                        Current High-Risk
+                                    </div>
+
+                                    <div
+                                        class="metric-value"
+                                    >
+                                        ${(currentRate * 100).toFixed(1)}%
+                                    </div>
+
+                                </div>
+
+
+                                <div class="metric">
+
+                                    <div
+                                        class="metric-label"
+                                    >
+                                        Z-Score
+                                    </div>
+
+                                    <div
+                                        class="metric-value"
+                                    >
+                                        ${zScore.toFixed(2)}σ
+                                    </div>
+
+                                </div>
+
+
+                                <div class="metric">
+
+                                    <div
+                                        class="metric-label"
+                                    >
+                                        Source
+                                    </div>
+
+                                    <div
+                                        class="metric-value"
+                                        style="font-size:10px"
+                                    >
+                                        ${
+                                            item.source ||
+                                            "LIVE_TRANSACTION_STREAM"
+                                        }
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </article>
+
+                    `;
+
+                }
+            )
+            .join("");
+
+}
+
+
+/* ============================================================
+   LOAD + REFRESH
+   ============================================================ */
+
+loadSpikes();
+
+
+setInterval(
+    loadSpikes,
+    5000
+);
+
+</script>
+
+</body>
+
+</html>

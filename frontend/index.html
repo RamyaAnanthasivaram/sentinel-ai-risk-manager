@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Sentinel AI Risk Manager</title>
+    <script>
+    window.location.href = "pages/dashboard.html";
+    </script>
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family:
+                Inter,
+                Segoe UI,
+                Arial,
+                sans-serif;
+
+            background: #f5f7fb;
+            color: #172033;
+        }
+
+        header {
+            background: #111827;
+            color: white;
+            padding: 20px 32px;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        header span {
+            font-size: 13px;
+            color: #a7f3d0;
+        }
+
+        main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 28px;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns:
+                repeat(4, 1fr);
+
+            gap: 18px;
+
+            margin-bottom: 24px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 14px;
+            padding: 20px;
+
+            box-shadow:
+                0 4px 16px
+                rgba(15, 23, 42, 0.06);
+        }
+
+        .card-label {
+            color: #64748b;
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+
+        .card-value {
+            font-size: 30px;
+            font-weight: 700;
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns:
+                2fr 1fr;
+
+            gap: 20px;
+        }
+
+        .panel {
+            background: white;
+            border-radius: 14px;
+            padding: 20px;
+
+            box-shadow:
+                0 4px 16px
+                rgba(15, 23, 42, 0.06);
+        }
+
+        .panel h2 {
+            margin-top: 0;
+            font-size: 18px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            text-align: left;
+            padding: 12px 8px;
+            border-bottom: 1px solid #e5e7eb;
+
+            font-size: 13px;
+        }
+
+        th {
+            color: #64748b;
+            font-size: 12px;
+        }
+
+        .badge {
+            padding: 5px 9px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .ALLOW {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .REVIEW {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .BLOCK {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .LOW {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .MEDIUM {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .HIGH {
+            background: #ffedd5;
+            color: #9a3412;
+        }
+
+        .CRITICAL {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .incident {
+            border-left: 5px solid #dc2626;
+            padding: 14px;
+            background: #fff7f7;
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+
+        .incident-title {
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .empty {
+            color: #94a3b8;
+            padding: 20px 0;
+        }
+
+        .refresh {
+            border: none;
+            border-radius: 8px;
+            padding: 9px 14px;
+            cursor: pointer;
+            background: white;
+            color: #111827;
+            font-weight: 600;
+        }
+
+        @media(max-width: 900px) {
+
+            .cards {
+                grid-template-columns:
+                    repeat(2, 1fr);
+            }
+
+            .layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+    </style>
+</head>
+
+
+<body>
+
+<header>
+
+    <div>
+        <h1>Sentinel AI Risk Manager</h1>
+        <span>
+            Live Risk Operations
+        </span>
+    </div>
+
+    <button
+        class="refresh"
+        onclick="loadDashboard()"
+    >
+        Refresh
+    </button>
+
+</header>
+
+
+<main>
+
+    <!-- ================================================= -->
+    <!-- KPI CARDS -->
+    <!-- ================================================= -->
+
+    <section class="cards">
+
+        <div class="card">
+            <div class="card-label">
+                Transactions
+            </div>
+
+            <div
+                class="card-value"
+                id="totalTransactions"
+            >
+                —
+            </div>
+        </div>
+
+
+        <div class="card">
+            <div class="card-label">
+                High Risk
+            </div>
+
+            <div
+                class="card-value"
+                id="highRisk"
+            >
+                —
+            </div>
+        </div>
+
+
+        <div class="card">
+            <div class="card-label">
+                Pending Reviews
+            </div>
+
+            <div
+                class="card-value"
+                id="pendingReviews"
+            >
+                —
+            </div>
+        </div>
+
+
+        <div class="card">
+            <div class="card-label">
+                Blocked
+            </div>
+
+            <div
+                class="card-value"
+                id="blocked"
+            >
+                —
+            </div>
+        </div>
+
+    </section>
+
+
+    <section class="layout">
+
+        <!-- ================================================= -->
+        <!-- LIVE TRANSACTIONS -->
+        <!-- ================================================= -->
+
+        <div class="panel">
+
+            <h2>
+                Live Transaction Feed
+            </h2>
+
+            <table>
+
+                <thead>
+
+                    <tr>
+                        <th>ID</th>
+                        <th>Amount</th>
+                        <th>Risk</th>
+                        <th>Decision</th>
+                    </tr>
+
+                </thead>
+
+                <tbody id="transactionsBody">
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- REVIEW QUEUE -->
+        <!-- ================================================= -->
+
+        <div class="panel">
+
+            <h2>
+                Human Review Queue
+            </h2>
+
+            <div id="reviews">
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <section
+        class="panel"
+        style="margin-top: 20px;"
+    >
+
+        <h2>
+            Recent Audit Decisions
+        </h2>
+
+        <table>
+
+            <thead>
+
+                <tr>
+                    <th>Transaction</th>
+                    <th>Risk</th>
+                    <th>Recommended</th>
+                    <th>Final</th>
+                    <th>Reviewer</th>
+                </tr>
+
+            </thead>
+
+            <tbody id="auditBody">
+
+            </tbody>
+
+        </table>
+
+    </section>
+
+</main>
+
+
+<script>
+
+const API = "http://127.0.0.1:8001";
+
+
+async function getJSON(path) {
+
+    const response =
+        await fetch(API + path);
+
+    if (!response.ok) {
+        throw new Error(
+            `${response.status} ${path}`
+        );
+    }
+
+    return response.json();
+}
+
+
+function badge(value) {
+
+    return `
+        <span class="badge ${value}">
+            ${value}
+        </span>
+    `;
+}
+
+
+async function loadStats() {
+
+    const data =
+        await getJSON(
+            "/api/dashboard/stats"
+        );
+
+    document
+        .getElementById("totalTransactions")
+        .textContent =
+        data.total_transactions;
+
+    document
+        .getElementById("highRisk")
+        .textContent =
+        data.high_risk_transactions;
+
+    document
+        .getElementById("pendingReviews")
+        .textContent =
+        data.pending_reviews;
+
+    document
+        .getElementById("blocked")
+        .textContent =
+        data.blocked_transactions;
+}
+
+
+async function loadTransactions() {
+
+    const data =
+        await getJSON(
+            "/api/transactions/recent?limit=20"
+        );
+
+    const body =
+        document.getElementById(
+            "transactionsBody"
+        );
+
+    body.innerHTML = "";
+
+    for (
+        const tx of data.transactions
+    ) {
+
+        body.innerHTML += `
+            <tr>
+
+                <td>
+                    ${tx.transaction_id}
+                </td>
+
+                <td>
+                    ₹${Number(
+                        tx.amount
+                    ).toFixed(2)}
+                </td>
+
+                <td>
+                    ${Number(
+                        tx.risk_score
+                    ).toFixed(2)}
+                </td>
+
+                <td>
+                    ${badge(tx.decision)}
+                </td>
+
+            </tr>
+        `;
+    }
+}
+
+
+async function loadReviews() {
+
+    const data =
+        await getJSON(
+            "/api/reviews"
+        );
+
+    const container =
+        document.getElementById(
+            "reviews"
+        );
+
+    container.innerHTML = "";
+
+    const pending =
+        data.reviews.filter(
+            r => r.status === "PENDING"
+        );
+
+    if (!pending.length) {
+
+        container.innerHTML =
+            `<div class="empty">
+                No pending review cases.
+            </div>`;
+
+        return;
+    }
+
+    for (
+        const review of pending
+    ) {
+
+        container.innerHTML += `
+            <div class="incident">
+
+                <div class="incident-title">
+                    ${review.case_id}
+                </div>
+
+                <div>
+                    Transaction:
+                    ${review.transaction_id}
+                </div>
+
+                <div>
+                    Risk:
+                    ${Number(
+                        review.risk_score
+                    ).toFixed(2)}
+                </div>
+
+                <div>
+                    ${review.reasons.join(", ")}
+                </div>
+
+            </div>
+        `;
+    }
+}
+
+
+async function loadAudit() {
+
+    const data =
+        await getJSON(
+            "/api/audit"
+        );
+
+    const body =
+        document.getElementById(
+            "auditBody"
+        );
+
+    body.innerHTML = "";
+
+    const records =
+        data.audit || [];
+
+    for (
+        const record of records
+    ) {
+
+        body.innerHTML += `
+            <tr>
+
+                <td>
+                    ${record.transaction_id}
+                </td>
+
+                <td>
+                    ${Number(
+                        record.risk_score
+                    ).toFixed(2)}
+                </td>
+
+                <td>
+                    ${badge(
+                        record.recommended_action
+                    )}
+                </td>
+
+                <td>
+                    ${badge(
+                        record.final_action
+                    )}
+                </td>
+
+                <td>
+                    ${
+                        record.reviewer
+                        || "—"
+                    }
+                </td>
+
+            </tr>
+        `;
+    }
+}
+
+
+async function loadDashboard() {
+
+    try {
+
+        await Promise.all([
+            loadStats(),
+            loadTransactions(),
+            loadReviews(),
+            loadAudit()
+        ]);
+
+    } catch (error) {
+
+        console.error(
+            "Dashboard error:",
+            error
+        );
+
+    }
+}
+
+
+loadDashboard();
+
+setInterval(
+    loadDashboard,
+    5000
+);
+
+</script>
+
+</body>
+
+</html>

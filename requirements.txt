@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+catboost
+pandas
+numpy
+scikit-learn
+python-dotenv
+sqlalchemy
+pyarrow

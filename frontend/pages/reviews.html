@@ -1,0 +1,1302 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Sentinel — Human Review</title>
+
+    <link
+        rel="stylesheet"
+        href="../css/style.css"
+    >
+
+    <style>
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 18px;
+        }
+
+        .summary-card {
+            background: white;
+            border-radius: 14px;
+            padding: 20px;
+            box-shadow:
+                0 3px 14px
+                rgba(15, 23, 42, 0.06);
+        }
+
+        .summary-label {
+            color: #64748b;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: .4px;
+        }
+
+        .summary-value {
+            margin-top: 7px;
+            font-size: 30px;
+            font-weight: 800;
+        }
+
+        .panel {
+            background: white;
+            border-radius: 14px;
+            padding: 20px;
+            margin-bottom: 18px;
+            box-shadow:
+                0 3px 14px
+                rgba(15, 23, 42, 0.06);
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .panel-title {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 750;
+        }
+
+        .panel-subtitle {
+            margin-top: 4px;
+            color: #64748b;
+            font-size: 11px;
+        }
+
+        .case-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .case-card {
+            border: 1px solid #fde68a;
+            background: #fffbeb;
+            border-radius: 12px;
+            padding: 17px;
+        }
+
+        .case-card.resolved {
+            border-color: #dbe4ee;
+            background: #f8fafc;
+        }
+
+        .case-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 15px;
+        }
+
+        .case-id {
+            font-size: 16px;
+            font-weight: 800;
+        }
+
+        .case-meta {
+            margin-top: 5px;
+            color: #64748b;
+            font-size: 11px;
+        }
+
+        .case-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 9px;
+            margin-top: 15px;
+        }
+
+        .case-metric {
+            background: white;
+            border-radius: 8px;
+            padding: 11px;
+        }
+
+        .metric-label {
+            color: #64748b;
+            font-size: 8px;
+            text-transform: uppercase;
+        }
+
+        .metric-value {
+            margin-top: 4px;
+            font-size: 14px;
+            font-weight: 750;
+        }
+
+        .reason-box {
+            margin-top: 13px;
+            padding: 11px 12px;
+            border-radius: 8px;
+            background: white;
+            color: #475569;
+            font-size: 11px;
+            line-height: 1.5;
+        }
+
+        .actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 14px;
+        }
+
+        .btn {
+            border: none;
+            border-radius: 8px;
+            padding: 9px 13px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .btn-approve {
+            background: #16a34a;
+            color: white;
+        }
+
+        .btn-decline {
+            background: #dc2626;
+            color: white;
+        }
+
+        .btn-escalate {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #172033;
+        }
+
+        .detail-banner {
+            display: none;
+            margin-bottom: 18px;
+            padding: 15px;
+            border-radius: 11px;
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+        }
+
+        .detail-banner.visible {
+            display: block;
+        }
+
+        .detail-banner-title {
+            font-size: 15px;
+            font-weight: 800;
+            color: #1d4ed8;
+        }
+
+        .detail-banner-text {
+            margin-top: 4px;
+            color: #475569;
+            font-size: 11px;
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            border-radius: 999px;
+            padding: 6px 10px;
+            font-size: 9px;
+            font-weight: 750;
+        }
+
+        .pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .resolved {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .empty {
+            padding: 38px;
+            text-align: center;
+            color: #94a3b8;
+            font-size: 12px;
+        }
+
+        .error {
+            padding: 14px;
+            border-radius: 9px;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+            font-size: 12px;
+        }
+
+        .message {
+            margin-top: 12px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-size: 11px;
+            display: none;
+        }
+
+        .message.show {
+            display: block;
+        }
+
+        .message.success {
+            background: #ecfdf5;
+            border: 1px solid #bbf7d0;
+            color: #166534;
+        }
+
+        .message.error {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+        }
+
+        @media (max-width: 1000px) {
+
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .case-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+        }
+
+        @media (max-width: 600px) {
+
+            .case-grid {
+                grid-template-columns: 1fr;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body data-page="reviews">
+
+
+<div class="app">
+
+    <aside
+        class="sidebar"
+        id="sidebar"
+    ></aside>
+
+
+    <main class="main">
+
+
+        <div class="page-header">
+
+            <div>
+
+                <h1 class="page-title">
+                    Human Review
+                </h1>
+
+                <div class="page-subtitle">
+                    Analyst decisions for elevated-risk transactions
+                </div>
+
+            </div>
+
+
+            <div class="status">
+
+                <span class="status-dot"></span>
+
+                Review Operations
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             SUMMARY
+             ================================================= -->
+
+        <section class="summary-grid">
+
+            <div class="summary-card">
+
+                <div class="summary-label">
+                    Pending Cases
+                </div>
+
+                <div
+                    class="summary-value"
+                    id="pendingCount"
+                >
+                    0
+                </div>
+
+            </div>
+
+
+            <div class="summary-card">
+
+                <div class="summary-label">
+                    Resolved Cases
+                </div>
+
+                <div
+                    class="summary-value"
+                    id="resolvedCount"
+                >
+                    0
+                </div>
+
+            </div>
+
+
+            <div class="summary-card">
+
+                <div class="summary-label">
+                    Total Cases
+                </div>
+
+                <div
+                    class="summary-value"
+                    id="totalCount"
+                >
+                    0
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             EXACT CASE
+             ================================================= -->
+
+        <div
+            id="caseBanner"
+            class="detail-banner"
+        >
+
+            <div
+                class="detail-banner-title"
+                id="caseBannerTitle"
+            >
+                Review Case
+            </div>
+
+            <div
+                class="detail-banner-text"
+                id="caseBannerText"
+            >
+                —
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             PENDING
+             ================================================= -->
+
+        <section class="panel">
+
+            <div class="panel-header">
+
+                <div>
+
+                    <h2 class="panel-title">
+                        Pending Review
+                    </h2>
+
+                    <div class="panel-subtitle">
+                        Cases awaiting analyst action
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div
+                id="pendingContainer"
+                class="case-list"
+            >
+
+                <div class="empty">
+                    Loading review cases...
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             HISTORY
+             ================================================= -->
+
+        <section class="panel">
+
+            <div class="panel-header">
+
+                <div>
+
+                    <h2 class="panel-title">
+                        Review History
+                    </h2>
+
+                    <div class="panel-subtitle">
+                        Previously resolved analyst decisions
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div
+                id="historyContainer"
+                class="case-list"
+            >
+
+                <div class="empty">
+                    Loading review history...
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <div
+            id="pageMessage"
+            class="message"
+        ></div>
+
+
+    </main>
+
+</div>
+
+
+<script src="../js/app.js?v=3"></script>
+
+
+<script>
+
+/* ============================================================
+   STATE
+   ============================================================ */
+
+let reviews = [];
+
+const query =
+    new URLSearchParams(
+        window.location.search
+    );
+
+const requestedCase =
+    query.get("case_id");
+
+
+/* ============================================================
+   LOAD REVIEWS
+   ============================================================ */
+
+async function loadReviews() {
+
+    try {
+
+        const data =
+            await api(
+                "/api/reviews"
+            );
+
+
+        reviews =
+            Array.isArray(
+                data.reviews
+            )
+                ? data.reviews
+                : [];
+
+
+        renderSummary();
+
+        renderPending();
+
+        renderHistory();
+
+        showRequestedCase();
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Review API error:",
+            error
+        );
+
+
+        document.getElementById(
+            "pendingContainer"
+        ).innerHTML = `
+
+            <div class="error">
+
+                Unable to load review cases.
+
+                <br><br>
+
+                ${error.message}
+
+            </div>
+
+        `;
+
+    }
+
+}
+
+
+/* ============================================================
+   SUMMARY
+   ============================================================ */
+
+function renderSummary() {
+
+    const pending =
+        reviews.filter(
+            review =>
+                review.status === "PENDING"
+        ).length;
+
+
+    const resolved =
+        reviews.filter(
+            review =>
+                review.status === "RESOLVED"
+        ).length;
+
+
+    document.getElementById(
+        "pendingCount"
+    ).textContent =
+        pending;
+
+
+    document.getElementById(
+        "resolvedCount"
+    ).textContent =
+        resolved;
+
+
+    document.getElementById(
+        "totalCount"
+    ).textContent =
+        reviews.length;
+
+}
+
+
+/* ============================================================
+   PENDING
+   ============================================================ */
+
+function renderPending() {
+
+    const container =
+        document.getElementById(
+            "pendingContainer"
+        );
+
+
+    const pending =
+        reviews.filter(
+            review =>
+                review.status === "PENDING"
+        );
+
+
+    if (!pending.length) {
+
+        container.innerHTML = `
+
+            <div class="empty">
+
+                No pending review cases.
+
+                <br>
+
+                Sentinel currently has no unresolved
+                analyst decisions.
+
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    container.innerHTML =
+        pending
+            .map(
+                review =>
+                    renderCase(
+                        review,
+                        true
+                    )
+            )
+            .join("");
+
+}
+
+
+/* ============================================================
+   HISTORY
+   ============================================================ */
+
+function renderHistory() {
+
+    const container =
+        document.getElementById(
+            "historyContainer"
+        );
+
+
+    const resolved =
+        reviews.filter(
+            review =>
+                review.status === "RESOLVED"
+        );
+
+
+    if (!resolved.length) {
+
+        container.innerHTML = `
+
+            <div class="empty">
+                No resolved review cases yet.
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    container.innerHTML =
+        resolved
+            .map(
+                review =>
+                    renderCase(
+                        review,
+                        false
+                    )
+            )
+            .join("");
+
+}
+
+
+/* ============================================================
+   CASE CARD
+   ============================================================ */
+
+function renderCase(
+    review,
+    isPending
+) {
+
+    const reasons =
+        Array.isArray(
+            review.reasons
+        )
+            ? review.reasons.join(", ")
+            : (
+                review.reasons
+                || "No additional reasons recorded."
+            );
+
+
+    const caseClass =
+        isPending
+            ? ""
+            : "resolved";
+
+
+    const statusClass =
+        isPending
+            ? "pending"
+            : "resolved";
+
+
+    const actionButtons =
+        isPending
+
+            ? `
+
+                <div class="actions">
+
+                    <button
+                        class="btn btn-approve"
+                        onclick="
+                            resolveCase(
+                                '${escapeJs(review.case_id)}',
+                                'APPROVE'
+                            )
+                        "
+                    >
+                        Approve
+                    </button>
+
+
+                    <button
+                        class="btn btn-decline"
+                        onclick="
+                            resolveCase(
+                                '${escapeJs(review.case_id)}',
+                                'DECLINE'
+                            )
+                        "
+                    >
+                        Decline
+                    </button>
+
+
+                    <button
+                        class="btn btn-escalate"
+                        onclick="
+                            resolveCase(
+                                '${escapeJs(review.case_id)}',
+                                'ESCALATE'
+                            )
+                        "
+                    >
+                        Escalate
+                    </button>
+
+                </div>
+
+            `
+
+            : `
+
+                <div class="actions">
+
+                    <a
+                        class="btn btn-secondary"
+                        href="
+                            transactions.html
+                            ?transaction=${encodeURIComponent(
+                                review.transaction_id
+                            )}
+                        "
+                    >
+                        View Transaction
+                    </a>
+
+                </div>
+
+            `;
+
+
+    return `
+
+        <article
+            class="
+                case-card
+                ${caseClass}
+            "
+            id="
+                case-${escapeHtml(
+                    review.case_id
+                )}
+            "
+        >
+
+            <div class="case-header">
+
+                <div>
+
+                    <div class="case-id">
+                        ${
+                            review.case_id
+                        }
+                    </div>
+
+                    <div class="case-meta">
+                        Transaction
+                        ${
+                            review.transaction_id
+                        }
+                    </div>
+
+                </div>
+
+
+                <span
+                    class="
+                        status-pill
+                        ${statusClass}
+                    "
+                >
+                    ${
+                        review.status
+                    }
+                </span>
+
+            </div>
+
+
+            <div class="case-grid">
+
+                <div class="case-metric">
+
+                    <div class="metric-label">
+                        Risk Score
+                    </div>
+
+                    <div class="metric-value">
+                        ${Number(
+                            review.risk_score || 0
+                        ).toFixed(2)}
+                    </div>
+
+                </div>
+
+
+                <div class="case-metric">
+
+                    <div class="metric-label">
+                        Regional Risk
+                    </div>
+
+                    <div class="metric-value">
+                        ${Number(
+                            review.regional_risk || 0
+                        ).toFixed(2)}
+                    </div>
+
+                </div>
+
+
+                <div class="case-metric">
+
+                    <div class="metric-label">
+                        Reviewer
+                    </div>
+
+                    <div class="metric-value">
+                        ${
+                            review.reviewer
+                            || "Unassigned"
+                        }
+                    </div>
+
+                </div>
+
+
+                <div class="case-metric">
+
+                    <div class="metric-label">
+                        Resolution
+                    </div>
+
+                    <div class="metric-value">
+                        ${
+                            review.resolution
+                            || "Pending"
+                        }
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="reason-box">
+
+                <strong>
+                    Reason:
+                </strong>
+
+                ${
+                    reasons
+                }
+
+                ${
+                    review.notes
+                        ? `
+                            <br><br>
+                            <strong>
+                                Notes:
+                            </strong>
+                            ${escapeHtml(
+                                review.notes
+                            )}
+                        `
+                        : ""
+                }
+
+            </div>
+
+
+            ${actionButtons}
+
+        </article>
+
+    `;
+
+}
+
+
+/* ============================================================
+   SHOW REQUESTED CASE
+   ============================================================ */
+
+function showRequestedCase() {
+
+    if (!requestedCase) {
+
+        return;
+
+    }
+
+
+    const review =
+        reviews.find(
+            item =>
+                item.case_id ===
+                requestedCase
+        );
+
+
+    const banner =
+        document.getElementById(
+            "caseBanner"
+        );
+
+
+    if (!review) {
+
+        banner.classList.add(
+            "visible"
+        );
+
+
+        document.getElementById(
+            "caseBannerTitle"
+        ).textContent =
+            "Review case not found";
+
+
+        document.getElementById(
+            "caseBannerText"
+        ).textContent =
+            requestedCase;
+
+
+        return;
+
+    }
+
+
+    banner.classList.add(
+        "visible"
+    );
+
+
+    document.getElementById(
+        "caseBannerTitle"
+    ).textContent =
+        review.case_id;
+
+
+    document.getElementById(
+        "caseBannerText"
+    ).textContent =
+        `Transaction ${review.transaction_id} • Risk ${Number(
+            review.risk_score || 0
+        ).toFixed(2)} • ${review.status}`;
+
+
+    setTimeout(
+        () => {
+
+            const element =
+                document.getElementById(
+                    "case-" +
+                    review.case_id
+                );
+
+
+            if (element) {
+
+                element.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center"
+                });
+
+            }
+
+        },
+        150
+    );
+
+}
+
+
+/* ============================================================
+   RESOLVE CASE
+   ============================================================ */
+
+async function resolveCase(
+    caseId,
+    resolution
+) {
+
+    const reviewer =
+        "analyst-01";
+
+
+    const notes =
+        `Resolved from Sentinel Human Review as ${resolution}.`;
+
+
+    try {
+
+        const url =
+            API +
+            "/api/reviews/" +
+            encodeURIComponent(
+                caseId
+            ) +
+            "/resolve" +
+            "?resolution=" +
+            encodeURIComponent(
+                resolution
+            ) +
+            "&reviewer=" +
+            encodeURIComponent(
+                reviewer
+            ) +
+            "&notes=" +
+            encodeURIComponent(
+                notes
+            );
+
+
+        const response =
+            await fetch(
+                url,
+                {
+                    method: "POST",
+                    headers: {
+                        "Accept":
+                            "application/json"
+                    }
+                }
+            );
+
+
+        if (!response.ok) {
+
+            let detail =
+                `HTTP ${response.status}`;
+
+
+            try {
+
+                const errorData =
+                    await response.json();
+
+
+                detail =
+                    errorData.detail
+                    || detail;
+
+            }
+
+            catch (_) {}
+
+
+            throw new Error(
+                detail
+            );
+
+        }
+
+
+        const result =
+            await response.json();
+
+
+        showMessage(
+            `Case ${caseId} resolved as ${resolution}.`,
+            "success"
+        );
+
+
+        await loadReviews();
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Resolve error:",
+            error
+        );
+
+
+        showMessage(
+            `Unable to resolve case: ${error.message}`,
+            "error"
+        );
+
+    }
+
+}
+
+
+/* ============================================================
+   MESSAGE
+   ============================================================ */
+
+function showMessage(
+    text,
+    type
+) {
+
+    const message =
+        document.getElementById(
+            "pageMessage"
+        );
+
+
+    message.textContent =
+        text;
+
+
+    message.className =
+        `message show ${type}`;
+
+
+    setTimeout(
+        () => {
+
+            message.classList.remove(
+                "show"
+            );
+
+        },
+        4000
+    );
+
+}
+
+
+/* ============================================================
+   ESCAPING
+   ============================================================ */
+
+function escapeHtml(
+    value
+) {
+
+    return String(
+        value ?? ""
+    )
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+
+}
+
+
+function escapeJs(
+    value
+) {
+
+    return String(
+        value ?? ""
+    )
+        .replace(
+            /\\/g,
+            "\\\\"
+        )
+        .replace(
+            /'/g,
+            "\\'"
+        );
+
+}
+
+
+/* ============================================================
+   LOAD
+   ============================================================ */
+
+loadReviews();
+
+
+/* ============================================================
+   AUTO REFRESH
+   ============================================================ */
+
+setInterval(
+    loadReviews,
+    10000
+);
+
+</script>
+
+
+</body>
+
+</html>

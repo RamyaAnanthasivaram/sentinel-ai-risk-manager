@@ -1,0 +1,1385 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Sentinel — System Health</title>
+
+    <link
+        rel="stylesheet"
+        href="../css/style.css"
+    >
+
+    <style>
+
+        .health-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 18px;
+        }
+
+        .health-card {
+            background: white;
+            border-radius: 14px;
+            padding: 19px;
+            box-shadow:
+                0 3px 14px
+                rgba(15, 23, 42, 0.06);
+        }
+
+        .health-label {
+            color: #64748b;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: .35px;
+        }
+
+        .health-value {
+            margin-top: 7px;
+            font-size: 26px;
+            font-weight: 800;
+        }
+
+        .panel {
+            background: white;
+            border-radius: 14px;
+            padding: 22px;
+            margin-bottom: 18px;
+            box-shadow:
+                0 3px 14px
+                rgba(15, 23, 42, 0.06);
+        }
+
+        .panel-title {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 750;
+        }
+
+        .panel-subtitle {
+            margin-top: 4px;
+            color: #64748b;
+            font-size: 11px;
+        }
+
+        .service-list {
+            margin-top: 17px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .service-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            padding: 14px;
+            background: #f8fafc;
+            border-radius: 10px;
+            border: 1px solid #eef2f7;
+        }
+
+        .service-left {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+        }
+
+        .service-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #94a3b8;
+            flex-shrink: 0;
+        }
+
+        .service-dot.healthy {
+            background: #16a34a;
+        }
+
+        .service-dot.error {
+            background: #dc2626;
+        }
+
+        .service-name {
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .service-detail {
+            margin-top: 3px;
+            color: #64748b;
+            font-size: 10px;
+        }
+
+        .service-status {
+            font-size: 10px;
+            font-weight: 750;
+        }
+
+        .status-healthy {
+            color: #15803d;
+        }
+
+        .status-error {
+            color: #b91c1c;
+        }
+
+        .model-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 17px;
+        }
+
+        .model-card {
+            background: #f8fafc;
+            border-radius: 10px;
+            padding: 15px;
+        }
+
+        .model-label {
+            color: #64748b;
+            font-size: 9px;
+            text-transform: uppercase;
+        }
+
+        .model-value {
+            margin-top: 5px;
+            font-size: 17px;
+            font-weight: 750;
+        }
+
+        .policy-box {
+            margin-top: 17px;
+            background: #f8fafc;
+            border-radius: 10px;
+            padding: 17px;
+        }
+
+        .policy-band {
+            height: 15px;
+            margin-top: 14px;
+            display: flex;
+            overflow: hidden;
+            border-radius: 999px;
+        }
+
+        .band-allow {
+            background: #22c55e;
+        }
+
+        .band-review {
+            background: #f59e0b;
+        }
+
+        .band-block {
+            background: #ef4444;
+        }
+
+        .policy-legend {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+            color: #64748b;
+            font-size: 10px;
+        }
+
+        .refresh-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+        }
+
+        .last-check {
+            color: #64748b;
+            font-size: 10px;
+        }
+
+        .refresh-btn {
+            border: none;
+            border-radius: 8px;
+            padding: 9px 13px;
+            background: #2563eb;
+            color: white;
+            font-family: inherit;
+            font-size: 10px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .refresh-btn:hover {
+            background: #1d4ed8;
+        }
+
+        .message {
+            display: none;
+            margin-top: 12px;
+            padding: 11px 12px;
+            border-radius: 8px;
+            font-size: 11px;
+        }
+
+        .message.show {
+            display: block;
+        }
+
+        .message.error {
+            color: #991b1b;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+        }
+
+        @media (max-width: 1000px) {
+
+            .health-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .model-grid {
+                grid-template-columns: 1fr;
+            }
+
+        }
+
+        @media (max-width: 600px) {
+
+            .health-grid {
+                grid-template-columns: 1fr;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body data-page="health">
+
+
+<div class="app">
+
+    <aside
+        class="sidebar"
+        id="sidebar"
+    ></aside>
+
+
+    <main class="main">
+
+
+        <div class="page-header">
+
+            <div>
+
+                <h1 class="page-title">
+                    System Health
+                </h1>
+
+                <div class="page-subtitle">
+                    Sentinel platform and risk engine status
+                </div>
+
+            </div>
+
+
+            <div class="status">
+
+                <span
+                    class="status-dot"
+                    id="headerDot"
+                ></span>
+
+                <span id="headerStatus">
+                    Checking System
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="refresh-row">
+
+            <div
+                class="last-check"
+                id="lastCheck"
+            >
+                Checking services...
+            </div>
+
+
+            <button
+                class="refresh-btn"
+                onclick="loadHealth()"
+            >
+                Refresh Health
+            </button>
+
+        </div>
+
+
+        <!-- =================================================
+             SUMMARY
+             ================================================= -->
+
+        <section class="health-grid">
+
+
+            <div class="health-card">
+
+                <div class="health-label">
+                    API Status
+                </div>
+
+                <div
+                    class="health-value"
+                    id="apiStatus"
+                >
+                    —
+                </div>
+
+            </div>
+
+
+            <div class="health-card">
+
+                <div class="health-label">
+                    Model
+                </div>
+
+                <div
+                    class="health-value"
+                    id="modelStatus"
+                >
+                    —
+                </div>
+
+            </div>
+
+
+            <div class="health-card">
+
+                <div class="health-label">
+                    Features
+                </div>
+
+                <div
+                    class="health-value"
+                    id="featureCount"
+                >
+                    —
+                </div>
+
+            </div>
+
+
+            <div class="health-card">
+
+                <div class="health-label">
+                    Policy Engine
+                </div>
+
+                <div
+                    class="health-value"
+                    id="policyStatus"
+                >
+                    —
+                </div>
+
+            </div>
+
+
+        </section>
+
+
+        <!-- =================================================
+             SERVICES
+             ================================================= -->
+
+        <section class="panel">
+
+            <h2 class="panel-title">
+                Service Status
+            </h2>
+
+            <div class="panel-subtitle">
+                Live connectivity checks against the Sentinel API
+            </div>
+
+
+            <div class="service-list">
+
+
+                <div class="service-row">
+
+                    <div class="service-left">
+
+                        <span
+                            class="service-dot"
+                            id="apiDot"
+                        ></span>
+
+
+                        <div>
+
+                            <div class="service-name">
+                                Sentinel API
+                            </div>
+
+                            <div
+                                class="service-detail"
+                                id="apiDetail"
+                            >
+                                Checking...
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        class="service-status"
+                        id="apiServiceStatus"
+                    >
+                        CHECKING
+                    </div>
+
+                </div>
+
+
+                <div class="service-row">
+
+                    <div class="service-left">
+
+                        <span
+                            class="service-dot"
+                            id="modelDot"
+                        ></span>
+
+
+                        <div>
+
+                            <div class="service-name">
+                                Risk Model
+                            </div>
+
+                            <div
+                                class="service-detail"
+                                id="modelDetail"
+                            >
+                                Checking...
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        class="service-status"
+                        id="modelServiceStatus"
+                    >
+                        CHECKING
+                    </div>
+
+                </div>
+
+
+                <div class="service-row">
+
+                    <div class="service-left">
+
+                        <span
+                            class="service-dot"
+                            id="policyDot"
+                        ></span>
+
+
+                        <div>
+
+                            <div class="service-name">
+                                Policy Engine
+                            </div>
+
+                            <div
+                                class="service-detail"
+                                id="policyDetail"
+                            >
+                                Checking...
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        class="service-status"
+                        id="policyServiceStatus"
+                    >
+                        CHECKING
+                    </div>
+
+                </div>
+
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             MODEL
+             ================================================= -->
+
+        <section class="panel">
+
+            <h2 class="panel-title">
+                Sentinel Model
+            </h2>
+
+            <div class="panel-subtitle">
+                Currently loaded model configuration
+            </div>
+
+
+            <div class="model-grid">
+
+
+                <div class="model-card">
+
+                    <div class="model-label">
+                        Model Version
+                    </div>
+
+                    <div
+                        class="model-value"
+                        id="modelVersion"
+                    >
+                        —
+                    </div>
+
+                </div>
+
+
+                <div class="model-card">
+
+                    <div class="model-label">
+                        Feature Count
+                    </div>
+
+                    <div
+                        class="model-value"
+                        id="modelFeatures"
+                    >
+                        —
+                    </div>
+
+                </div>
+
+
+                <div class="model-card">
+
+                    <div class="model-label">
+                        Categorical Features
+                    </div>
+
+                    <div
+                        class="model-value"
+                        id="categoricalFeatures"
+                    >
+                        —
+                    </div>
+
+                </div>
+
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             POLICY
+             ================================================= -->
+
+        <section class="panel">
+
+            <h2 class="panel-title">
+                Active Policy
+            </h2>
+
+            <div class="panel-subtitle">
+                Current decision thresholds used by Sentinel
+            </div>
+
+
+            <div class="policy-box">
+
+
+                <div
+                    style="
+                        display:flex;
+                        justify-content:space-between;
+                        gap:20px;
+                        flex-wrap:wrap;
+                    "
+                >
+
+                    <strong>
+                        <span id="allowThreshold">
+                            —
+                        </span>
+                    </strong>
+
+
+                    <strong>
+                        <span id="blockThreshold">
+                            —
+                        </span>
+                    </strong>
+
+                </div>
+
+
+                <div
+                    class="policy-band"
+                    id="policyBand"
+                ></div>
+
+
+                <div class="policy-legend">
+
+                    <span>
+                        ALLOW
+                    </span>
+
+                    <span>
+                        REVIEW
+                    </span>
+
+                    <span>
+                        BLOCK
+                    </span>
+
+                </div>
+
+
+            </div>
+
+        </section>
+
+
+        <div
+            id="message"
+            class="message"
+        ></div>
+
+
+    </main>
+
+</div>
+
+
+<script src="../js/app.js?v=5"></script>
+
+
+<script>
+
+/* ============================================================
+   HEALTH STATE
+   ============================================================ */
+
+let healthOk = false;
+
+let modelOk = false;
+
+let policyOk = false;
+
+
+/* ============================================================
+   LOAD HEALTH
+   ============================================================ */
+
+async function loadHealth() {
+
+    healthOk = false;
+    modelOk = false;
+    policyOk = false;
+
+
+    setChecking();
+
+
+    try {
+
+        const result =
+            await Promise.allSettled([
+
+                fetchJson(
+                    "/health"
+                ),
+
+                fetchJson(
+                    "/api/model"
+                ),
+
+                fetchJson(
+                    "/api/policy"
+                )
+
+            ]);
+
+
+        /* ====================================================
+           API
+           ==================================================== */
+
+        const health =
+            result[0];
+
+
+        if (
+            health.status ===
+            "fulfilled"
+        ) {
+
+            healthOk = true;
+
+
+            const data =
+                health.value;
+
+
+            document.getElementById(
+                "apiStatus"
+            ).textContent =
+                "OK";
+
+
+            document.getElementById(
+                "apiDetail"
+            ).textContent =
+                `${data.service || "Sentinel"} v${
+                    data.version || "—"
+                }`;
+
+
+            setService(
+                "apiDot",
+                "apiServiceStatus",
+                true
+            );
+
+        }
+
+        else {
+
+            document.getElementById(
+                "apiStatus"
+            ).textContent =
+                "DOWN";
+
+
+            document.getElementById(
+                "apiDetail"
+            ).textContent =
+                "API unavailable";
+
+
+            setService(
+                "apiDot",
+                "apiServiceStatus",
+                false
+            );
+
+        }
+
+
+        /* ====================================================
+           MODEL
+           ==================================================== */
+
+        const model =
+            result[1];
+
+
+        if (
+            model.status ===
+            "fulfilled"
+        ) {
+
+            modelOk = true;
+
+
+            const data =
+                model.value;
+
+
+            document.getElementById(
+                "modelStatus"
+            ).textContent =
+                "READY";
+
+
+            document.getElementById(
+                "modelVersion"
+            ).textContent =
+                data.model_version
+                || "—";
+
+
+            document.getElementById(
+                "modelFeatures"
+            ).textContent =
+                data.feature_count
+                ?? "—";
+
+
+            document.getElementById(
+                "featureCount"
+            ).textContent =
+                data.feature_count
+                ?? "—";
+
+
+            document.getElementById(
+                "categoricalFeatures"
+            ).textContent =
+                data.categorical_feature_count
+                ?? "—";
+
+
+            document.getElementById(
+                "modelDetail"
+            ).textContent =
+                `${
+                    data.feature_count
+                    ?? "—"
+                } features loaded`;
+
+
+            setService(
+                "modelDot",
+                "modelServiceStatus",
+                true
+            );
+
+        }
+
+        else {
+
+            document.getElementById(
+                "modelStatus"
+            ).textContent =
+                "ERROR";
+
+
+            document.getElementById(
+                "modelDetail"
+            ).textContent =
+                "Model endpoint unavailable";
+
+
+            setService(
+                "modelDot",
+                "modelServiceStatus",
+                false
+            );
+
+        }
+
+
+        /* ====================================================
+           POLICY
+           ==================================================== */
+
+        const policy =
+            result[2];
+
+
+        if (
+            policy.status ===
+            "fulfilled"
+        ) {
+
+            policyOk = true;
+
+
+            const data =
+                policy.policy
+                || policy;
+
+
+            const allow =
+                Number(
+                    data.allow_threshold
+                    || 0
+                );
+
+
+            const block =
+                Number(
+                    data.block_threshold
+                    || 0
+                );
+
+
+            document.getElementById(
+                "policyStatus"
+            ).textContent =
+                "ACTIVE";
+
+
+            document.getElementById(
+                "allowThreshold"
+            ).textContent =
+                `Allow < ${allow.toFixed(2)}`;
+
+
+            document.getElementById(
+                "blockThreshold"
+            ).textContent =
+                `Block ≥ ${block.toFixed(2)}`;
+
+
+            document.getElementById(
+                "policyDetail"
+            ).textContent =
+                `Allow ${allow.toFixed(2)} • Block ${block.toFixed(2)}`;
+
+
+            setService(
+                "policyDot",
+                "policyServiceStatus",
+                true
+            );
+
+
+            renderPolicyBand(
+                allow,
+                block
+            );
+
+        }
+
+        else {
+
+            document.getElementById(
+                "policyStatus"
+            ).textContent =
+                "ERROR";
+
+
+            document.getElementById(
+                "policyDetail"
+            ).textContent =
+                "Policy endpoint unavailable";
+
+
+            setService(
+                "policyDot",
+                "policyServiceStatus",
+                false
+            );
+
+        }
+
+
+        /* ====================================================
+           HEADER
+           ==================================================== */
+
+        const allHealthy =
+            healthOk &&
+            modelOk &&
+            policyOk;
+
+
+        const dot =
+            document.getElementById(
+                "headerDot"
+            );
+
+
+        const header =
+            document.getElementById(
+                "headerStatus"
+            );
+
+
+        if (allHealthy) {
+
+            dot.style.background =
+                "#16a34a";
+
+
+            header.textContent =
+                "SYSTEM OPERATIONAL";
+
+        }
+
+        else {
+
+            dot.style.background =
+                "#dc2626";
+
+
+            header.textContent =
+                "ATTENTION REQUIRED";
+
+        }
+
+
+        document.getElementById(
+            "lastCheck"
+        ).textContent =
+            "Last checked " +
+            new Date().toLocaleTimeString(
+                "en-IN",
+                {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit"
+                }
+            );
+
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Health check error:",
+            error
+        );
+
+
+        showMessage(
+            "Unable to complete system health check.",
+            "error"
+        );
+
+    }
+
+}
+
+
+/* ============================================================
+   FETCH JSON
+   ============================================================ */
+
+async function fetchJson(
+    path
+) {
+
+    const response =
+        await fetch(
+            API + path
+        );
+
+
+    if (!response.ok) {
+
+        throw new Error(
+            `${response.status}: ${path}`
+        );
+
+    }
+
+
+    return response.json();
+
+}
+
+
+/* ============================================================
+   SERVICE UI
+   ============================================================ */
+
+function setService(
+    dotId,
+    statusId,
+    healthy
+) {
+
+    const dot =
+        document.getElementById(
+            dotId
+        );
+
+
+    const status =
+        document.getElementById(
+            statusId
+        );
+
+
+    dot.classList.remove(
+        "healthy",
+        "error"
+    );
+
+
+    status.classList.remove(
+        "status-healthy",
+        "status-error"
+    );
+
+
+    if (healthy) {
+
+        dot.classList.add(
+            "healthy"
+        );
+
+
+        status.classList.add(
+            "status-healthy"
+        );
+
+
+        status.textContent =
+            "HEALTHY";
+
+    }
+
+    else {
+
+        dot.classList.add(
+            "error"
+        );
+
+
+        status.classList.add(
+            "status-error"
+        );
+
+
+        status.textContent =
+            "ERROR";
+
+    }
+
+}
+
+
+/* ============================================================
+   CHECKING STATE
+   ============================================================ */
+
+function setChecking() {
+
+    document.getElementById(
+        "apiStatus"
+    ).textContent =
+        "CHECKING";
+
+
+    document.getElementById(
+        "modelStatus"
+    ).textContent =
+        "CHECKING";
+
+
+    document.getElementById(
+        "policyStatus"
+    ).textContent =
+        "CHECKING";
+
+
+    [
+        [
+            "apiDot",
+            "apiServiceStatus"
+        ],
+
+        [
+            "modelDot",
+            "modelServiceStatus"
+        ],
+
+        [
+            "policyDot",
+            "policyServiceStatus"
+        ]
+
+    ].forEach(
+        pair => {
+
+            const dot =
+                document.getElementById(
+                    pair[0]
+                );
+
+
+            const status =
+                document.getElementById(
+                    pair[1]
+                );
+
+
+            dot.classList.remove(
+                "healthy",
+                "error"
+            );
+
+
+            status.classList.remove(
+                "status-healthy",
+                "status-error"
+            );
+
+
+            status.textContent =
+                "CHECKING";
+
+        }
+    );
+
+
+    document.getElementById(
+        "headerStatus"
+    ).textContent =
+        "CHECKING SYSTEM";
+
+}
+
+
+/* ============================================================
+   POLICY BAND
+   ============================================================ */
+
+function renderPolicyBand(
+    allow,
+    block
+) {
+
+    const band =
+        document.getElementById(
+            "policyBand"
+        );
+
+
+    const allowWidth =
+        Math.max(
+            0,
+            Math.min(
+                100,
+                allow * 100
+            )
+        );
+
+
+    const reviewWidth =
+        Math.max(
+            0,
+            Math.min(
+                100,
+                (
+                    block -
+                    allow
+                ) * 100
+            )
+        );
+
+
+    const blockWidth =
+        Math.max(
+            0,
+            100 -
+            allowWidth -
+            reviewWidth
+        );
+
+
+    band.innerHTML = `
+
+        <div
+            class="band-allow"
+            style="
+                width:${allowWidth}%;
+            "
+        ></div>
+
+
+        <div
+            class="band-review"
+            style="
+                width:${reviewWidth}%;
+            "
+        ></div>
+
+
+        <div
+            class="band-block"
+            style="
+                width:${blockWidth}%;
+            "
+        ></div>
+
+    `;
+
+}
+
+
+/* ============================================================
+   MESSAGE
+   ============================================================ */
+
+function showMessage(
+    text,
+    type
+) {
+
+    const element =
+        document.getElementById(
+            "message"
+        );
+
+
+    element.textContent =
+        text;
+
+
+    element.className =
+        `message show ${type}`;
+
+}
+
+
+/* ============================================================
+   INITIAL LOAD
+   ============================================================ */
+
+loadHealth();
+
+
+/* ============================================================
+   AUTO REFRESH
+   ============================================================ */
+
+setInterval(
+    loadHealth,
+    10000
+);
+
+</script>
+
+
+</body>
+
+</html>

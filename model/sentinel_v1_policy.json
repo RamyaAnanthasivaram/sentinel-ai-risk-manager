@@ -1,0 +1,6 @@
+{
+  "model_version": "Sentinel-V1",
+  "allow_below": 0.58,
+  "review_below": 0.76,
+  "high_risk_at_or_above": 0.76
+}

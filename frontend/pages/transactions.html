@@ -1,0 +1,1947 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Sentinel — Transactions</title>
+
+    <link
+        rel="stylesheet"
+        href="../css/style.css"
+    >
+
+    <style>
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 18px;
+        }
+
+        .summary-card {
+            background: white;
+            border-radius: 14px;
+            padding: 18px;
+            box-shadow:
+                0 3px 14px
+                rgba(15, 23, 42, 0.06);
+        }
+
+        .summary-label {
+            color: #64748b;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: .4px;
+        }
+
+        .summary-value {
+            margin-top: 7px;
+            font-size: 28px;
+            font-weight: 800;
+        }
+
+        .monitor-panel {
+            background: white;
+            border-radius: 14px;
+            padding: 20px;
+            box-shadow:
+                0 3px 14px
+                rgba(15, 23, 42, 0.06);
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .search-box input {
+            width: 100%;
+            box-sizing: border-box;
+            border: 1px solid #dbe2ea;
+            border-radius: 9px;
+            padding: 11px 13px;
+            font-family: inherit;
+            font-size: 12px;
+            outline: none;
+        }
+
+        .search-box input:focus {
+            border-color: #2563eb;
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 7px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .filter-btn {
+            border: 1px solid #dbe2ea;
+            background: white;
+            color: #475569;
+            border-radius: 999px;
+            padding: 7px 11px;
+            font-size: 10px;
+            font-weight: 650;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .filter-btn.active {
+            background: #2563eb;
+            border-color: #2563eb;
+            color: white;
+        }
+
+        .filter-label {
+            color: #64748b;
+            font-size: 10px;
+            margin-right: 4px;
+            align-self: center;
+            text-transform: uppercase;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+        }
+
+        .transaction-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .transaction-table th,
+        .transaction-table td {
+            padding: 12px 9px;
+            border-bottom: 1px solid #edf0f3;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        .transaction-table th {
+            color: #64748b;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: .35px;
+        }
+
+        .transaction-table td {
+            font-size: 12px;
+        }
+
+        .transaction-row {
+            cursor: pointer;
+            transition: background .15s ease;
+        }
+
+        .transaction-row:hover {
+            background: #f8fafc;
+        }
+
+        .transaction-id {
+            font-weight: 750;
+        }
+
+        .risk-number {
+            font-weight: 750;
+        }
+
+        .region-text {
+            color: #475569;
+        }
+
+        .empty {
+            padding: 38px;
+            text-align: center;
+            color: #94a3b8;
+            font-size: 12px;
+        }
+
+        .error {
+            padding: 14px;
+            border-radius: 9px;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+            font-size: 12px;
+        }
+
+        /* =====================================================
+           DETAIL MODAL
+           ===================================================== */
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, .45);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            z-index: 1000;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-box {
+            width: min(760px, 100%);
+            max-height: 90vh;
+            overflow-y: auto;
+            background: white;
+            border-radius: 15px;
+            padding: 22px;
+            box-shadow:
+                0 20px 60px
+                rgba(15, 23, 42, .2);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .modal-title {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 800;
+        }
+
+        .modal-subtitle {
+            margin-top: 4px;
+            color: #64748b;
+            font-size: 11px;
+        }
+
+        .close-btn {
+            border: none;
+            background: #f1f5f9;
+            border-radius: 8px;
+            width: 34px;
+            height: 34px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .detail-summary {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-top: 18px;
+        }
+
+        .detail-card {
+            background: #f8fafc;
+            border-radius: 9px;
+            padding: 12px;
+        }
+
+        .detail-label {
+            color: #64748b;
+            font-size: 9px;
+            text-transform: uppercase;
+        }
+
+        .detail-value {
+            margin-top: 5px;
+            font-size: 14px;
+            font-weight: 750;
+            word-break: break-word;
+        }
+
+        .detail-section {
+            margin-top: 18px;
+        }
+
+        .detail-section-title {
+            margin-bottom: 10px;
+            font-size: 14px;
+            font-weight: 750;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .detail-item {
+            padding: 11px;
+            background: #f8fafc;
+            border-radius: 8px;
+        }
+
+        .detail-item-label {
+            color: #64748b;
+            font-size: 9px;
+        }
+
+        .detail-item-value {
+            margin-top: 4px;
+            font-size: 12px;
+            font-weight: 650;
+            word-break: break-word;
+        }
+
+        .reason-box {
+            background: #f8fafc;
+            padding: 12px;
+            border-radius: 8px;
+            color: #475569;
+            font-size: 11px;
+            line-height: 1.5;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            border: none;
+            border-radius: 8px;
+            padding: 10px 14px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 650;
+        }
+
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #172033;
+        }
+
+        /* =====================================================
+           ACTIVE FILTER NOTICE
+           ===================================================== */
+
+        .filter-notice {
+            display: none;
+            margin-top: 14px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            color: #1d4ed8;
+            font-size: 11px;
+        }
+
+        .filter-notice.visible {
+            display: block;
+        }
+
+        @media (max-width: 1000px) {
+
+            .summary-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .detail-summary {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+        }
+
+        @media (max-width: 600px) {
+
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .detail-summary {
+                grid-template-columns: 1fr;
+            }
+
+            .detail-grid {
+                grid-template-columns: 1fr;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body data-page="transactions">
+
+
+<div class="app">
+
+    <aside
+        class="sidebar"
+        id="sidebar"
+    ></aside>
+
+
+    <main class="main">
+
+
+        <!-- =================================================
+             HEADER
+             ================================================= -->
+
+        <div class="page-header">
+
+            <div>
+
+                <h1 class="page-title">
+                    Transactions
+                </h1>
+
+                <div class="page-subtitle">
+                    Monitor and investigate Sentinel-scored transactions
+                </div>
+
+            </div>
+
+
+            <div class="status">
+
+                <span class="status-dot"></span>
+
+                Transaction Monitoring
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             SUMMARY
+             ================================================= -->
+
+        <section class="summary-grid">
+
+            <div class="summary-card">
+
+                <div class="summary-label">
+                    Transactions
+                </div>
+
+                <div
+                    class="summary-value"
+                    id="totalCount"
+                >
+                    0
+                </div>
+
+            </div>
+
+
+            <div class="summary-card">
+
+                <div class="summary-label">
+                    High Risk
+                </div>
+
+                <div
+                    class="summary-value"
+                    id="highRiskCount"
+                >
+                    0
+                </div>
+
+            </div>
+
+
+            <div class="summary-card">
+
+                <div class="summary-label">
+                    Reviews
+                </div>
+
+                <div
+                    class="summary-value"
+                    id="reviewCount"
+                >
+                    0
+                </div>
+
+            </div>
+
+
+            <div class="summary-card">
+
+                <div class="summary-label">
+                    Blocks
+                </div>
+
+                <div
+                    class="summary-value"
+                    id="blockCount"
+                >
+                    0
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             MONITOR
+             ================================================= -->
+
+        <section class="monitor-panel">
+
+
+            <div class="toolbar">
+
+                <div class="search-box">
+
+                    <input
+                        id="searchInput"
+                        type="text"
+                        placeholder="Search transaction, region, customer, merchant, device..."
+                    >
+
+                </div>
+
+
+                <button
+                    class="btn btn-secondary"
+                    id="refreshButton"
+                >
+                    Refresh
+                </button>
+
+            </div>
+
+
+            <!-- DECISION FILTERS -->
+
+            <div class="filter-row">
+
+                <span class="filter-label">
+                    Decision
+                </span>
+
+
+                <button
+                    class="filter-btn"
+                    data-decision="ALL"
+                >
+                    All
+                </button>
+
+
+                <button
+                    class="filter-btn"
+                    data-decision="ALLOW"
+                >
+                    Allow
+                </button>
+
+
+                <button
+                    class="filter-btn"
+                    data-decision="REVIEW"
+                >
+                    Review
+                </button>
+
+
+                <button
+                    class="filter-btn"
+                    data-decision="BLOCK"
+                >
+                    Block
+                </button>
+
+            </div>
+
+
+            <!-- RISK FILTERS -->
+
+            <div class="filter-row">
+
+                <span class="filter-label">
+                    Risk
+                </span>
+
+
+                <button
+                    class="filter-btn"
+                    data-risk="ALL"
+                >
+                    All
+                </button>
+
+
+                <button
+                    class="filter-btn"
+                    data-risk="LOW"
+                >
+                    Low
+                </button>
+
+
+                <button
+                    class="filter-btn"
+                    data-risk="MEDIUM"
+                >
+                    Medium
+                </button>
+
+
+                <button
+                    class="filter-btn"
+                    data-risk="HIGH"
+                >
+                    High
+                </button>
+
+
+                <button
+                    class="filter-btn"
+                    data-risk="CRITICAL"
+                >
+                    Critical
+                </button>
+
+            </div>
+
+
+            <!-- DASHBOARD DRILL-DOWN NOTICE -->
+
+            <div
+                id="filterNotice"
+                class="filter-notice"
+            ></div>
+
+
+            <!-- TABLE -->
+
+            <div
+                id="tableContainer"
+                class="table-wrap"
+                style="margin-top:18px"
+            >
+
+                <div class="empty">
+                    Loading transactions...
+                </div>
+
+            </div>
+
+
+        </section>
+
+
+    </main>
+
+</div>
+
+
+<!-- =========================================================
+     TRANSACTION DETAIL MODAL
+     ========================================================= -->
+
+<div
+    class="modal"
+    id="transactionModal"
+>
+
+    <div class="modal-box">
+
+        <div class="modal-header">
+
+            <div>
+
+                <h2
+                    class="modal-title"
+                    id="modalTitle"
+                >
+                    Transaction
+                </h2>
+
+                <div
+                    class="modal-subtitle"
+                    id="modalSubtitle"
+                >
+                    —
+                </div>
+
+            </div>
+
+
+            <button
+                class="close-btn"
+                onclick="closeTransaction()"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <div
+            class="detail-summary"
+            id="detailSummary"
+        ></div>
+
+
+        <div class="detail-section">
+
+            <div class="detail-section-title">
+                Transaction Context
+            </div>
+
+            <div
+                class="detail-grid"
+                id="detailContext"
+            ></div>
+
+        </div>
+
+
+        <div class="detail-section">
+
+            <div class="detail-section-title">
+                Risk Explanation
+            </div>
+
+            <div
+                class="reason-box"
+                id="detailReasons"
+            >
+                —
+            </div>
+
+        </div>
+
+
+        <div class="modal-footer">
+
+            <div
+                style="
+                    color:#64748b;
+                    font-size:10px;
+                "
+                id="detailSource"
+            >
+                —
+            </div>
+
+
+            <button
+                class="btn btn-secondary"
+                onclick="closeTransaction()"
+            >
+                Close
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script src="../js/app.js?v=3"></script>
+
+
+<script>
+
+/* ============================================================
+   FILTER STATE
+   ============================================================ */
+
+let transactions = [];
+
+let decisionFilter = "ALL";
+
+let riskFilter = "ALL";
+
+let searchText = "";
+
+
+/* ============================================================
+   READ URL PARAMETERS
+   ============================================================ */
+
+const params =
+    new URLSearchParams(
+        window.location.search
+    );
+
+
+const urlDecision =
+    (
+        params.get("decision")
+        || ""
+    ).toUpperCase();
+
+
+const urlRisk =
+    (
+        params.get("risk")
+        || ""
+    ).toUpperCase();
+
+
+/*
+ * Dashboard drill-down:
+ *
+ * transactions.html?decision=BLOCK
+ * transactions.html?risk=HIGH
+ */
+
+if (
+    [
+        "ALLOW",
+        "REVIEW",
+        "BLOCK"
+    ].includes(
+        urlDecision
+    )
+) {
+
+    decisionFilter =
+        urlDecision;
+
+}
+
+
+if (
+    urlRisk === "HIGH"
+) {
+
+    riskFilter =
+        "HIGH";
+
+}
+
+
+/* ============================================================
+   POLICY
+   ============================================================ */
+
+let allowThreshold = 0.58;
+
+let blockThreshold = 0.76;
+
+
+async function loadPolicy() {
+
+    try {
+
+        const data =
+            await api(
+                "/api/policy"
+            );
+
+
+        const policy =
+            data.policy
+            || data;
+
+
+        if (
+            policy.allow_threshold !==
+            undefined
+        ) {
+
+            allowThreshold =
+                Number(
+                    policy.allow_threshold
+                );
+
+        }
+
+
+        if (
+            policy.block_threshold !==
+            undefined
+        ) {
+
+            blockThreshold =
+                Number(
+                    policy.block_threshold
+                );
+
+        }
+
+    }
+
+    catch (error) {
+
+        console.warn(
+            "Policy unavailable.",
+            error
+        );
+
+    }
+
+}
+
+
+/* ============================================================
+   LOAD TRANSACTIONS
+   ============================================================ */
+
+async function loadTransactions() {
+
+    const container =
+        document.getElementById(
+            "tableContainer"
+        );
+
+
+    try {
+
+        const data =
+            await api(
+                "/api/transactions/recent?limit=200"
+            );
+
+
+        transactions =
+            Array.isArray(
+                data.transactions
+            )
+                ? data.transactions
+                : [];
+
+
+        updateSummary();
+
+        updateFilterButtons();
+
+        updateFilterNotice();
+
+        renderTable();
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Transaction API error:",
+            error
+        );
+
+
+        container.innerHTML = `
+
+            <div class="error">
+
+                Unable to load transactions.
+
+                <br><br>
+
+                ${error.message}
+
+            </div>
+
+        `;
+
+    }
+
+}
+
+
+/* ============================================================
+   SUMMARY
+   ============================================================ */
+
+function updateSummary() {
+
+    document.getElementById(
+        "totalCount"
+    ).textContent =
+        transactions.length;
+
+
+    const highRisk =
+        transactions.filter(
+            tx =>
+                Number(
+                    tx.risk_score || 0
+                ) >= 76
+        ).length;
+
+
+    const reviews =
+        transactions.filter(
+            tx =>
+                String(
+                    tx.decision || ""
+                ).toUpperCase()
+                === "REVIEW"
+        ).length;
+
+
+    const blocks =
+        transactions.filter(
+            tx =>
+                String(
+                    tx.decision || ""
+                ).toUpperCase()
+                === "BLOCK"
+        ).length;
+
+
+    document.getElementById(
+        "highRiskCount"
+    ).textContent =
+        highRisk;
+
+
+    document.getElementById(
+        "reviewCount"
+    ).textContent =
+        reviews;
+
+
+    document.getElementById(
+        "blockCount"
+    ).textContent =
+        blocks;
+
+}
+
+
+/* ============================================================
+   FILTERING
+   ============================================================ */
+
+function filteredTransactions() {
+
+    const query =
+        searchText
+            .trim()
+            .toLowerCase();
+
+
+    return transactions.filter(
+        tx => {
+
+            const decision =
+                String(
+                    tx.decision || ""
+                ).toUpperCase();
+
+
+            const riskLevel =
+                String(
+                    tx.risk_level || ""
+                ).toUpperCase();
+
+
+            const score =
+                Number(
+                    tx.risk_score || 0
+                );
+
+
+            /* DECISION */
+
+            if (
+                decisionFilter !==
+                "ALL"
+            ) {
+
+                if (
+                    decision !==
+                    decisionFilter
+                ) {
+
+                    return false;
+
+                }
+
+            }
+
+
+            /* RISK */
+
+            if (
+                riskFilter !==
+                "ALL"
+            ) {
+
+                /*
+                 * HIGH from Dashboard means
+                 * HIGH + CRITICAL.
+                 */
+
+                if (
+                    riskFilter ===
+                    "HIGH"
+                ) {
+
+                    if (
+                        score < 76
+                    ) {
+
+                        return false;
+
+                    }
+
+                }
+
+                else {
+
+                    if (
+                        riskLevel !==
+                        riskFilter
+                    ) {
+
+                        return false;
+
+                    }
+
+                }
+
+            }
+
+
+            /* SEARCH */
+
+            if (!query) {
+
+                return true;
+
+            }
+
+
+            const searchable = [
+
+                tx.transaction_id,
+
+                tx.region_key,
+
+                tx.customer_id,
+
+                tx.merchant_id,
+
+                tx.device_id,
+
+                tx.payment_method,
+
+                tx.decision,
+
+                tx.risk_level
+
+            ]
+                .filter(
+                    value =>
+                        value !== null
+                        &&
+                        value !== undefined
+                )
+                .join(" ")
+                .toLowerCase();
+
+
+            return searchable.includes(
+                query
+            );
+
+        }
+    );
+
+}
+
+
+/* ============================================================
+   RENDER TABLE
+   ============================================================ */
+
+function renderTable() {
+
+    const container =
+        document.getElementById(
+            "tableContainer"
+        );
+
+
+    const rows =
+        filteredTransactions();
+
+
+    if (!rows.length) {
+
+        container.innerHTML = `
+
+            <div class="empty">
+
+                No transactions match
+                the current filters.
+
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    container.innerHTML = `
+
+        <table
+            class="transaction-table"
+        >
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        Transaction
+                    </th>
+
+                    <th>
+                        Time
+                    </th>
+
+                    <th>
+                        Amount
+                    </th>
+
+                    <th>
+                        Risk
+                    </th>
+
+                    <th>
+                        Level
+                    </th>
+
+                    <th>
+                        Decision
+                    </th>
+
+                    <th>
+                        Region
+                    </th>
+
+                    <th>
+                        Source
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                ${
+                    rows
+                        .map(
+                            (
+                                tx,
+                                index
+                            ) => `
+
+                                <tr
+                                    class="transaction-row"
+                                    onclick="
+                                        openTransaction(
+                                            ${index}
+                                        )
+                                    "
+                                    title="Open transaction details"
+                                >
+
+                                    <td>
+
+                                        <span
+                                            class="
+                                                transaction-id
+                                            "
+                                        >
+                                            ${
+                                                tx.transaction_id
+                                            }
+                                        </span>
+
+                                    </td>
+
+
+                                    <td>
+                                        ${
+                                            formatTime(
+                                                tx.event_time
+                                            )
+                                        }
+                                    </td>
+
+
+                                    <td>
+                                        ${money(
+                                            tx.amount
+                                        )}
+                                    </td>
+
+
+                                    <td>
+
+                                        <span
+                                            class="
+                                                risk-number
+                                            "
+                                        >
+                                            ${Number(
+                                                tx.risk_score || 0
+                                            ).toFixed(2)}
+                                        </span>
+
+                                    </td>
+
+
+                                    <td>
+                                        ${badge(
+                                            tx.risk_level
+                                        )}
+                                    </td>
+
+
+                                    <td>
+                                        ${badge(
+                                            tx.decision
+                                        )}
+                                    </td>
+
+
+                                    <td>
+
+                                        <span
+                                            class="
+                                                region-text
+                                            "
+                                        >
+                                            ${
+                                                tx.region_key
+                                                || "—"
+                                            }
+                                        </span>
+
+                                    </td>
+
+
+                                    <td>
+                                        ${
+                                            tx.source
+                                            || "—"
+                                        }
+                                    </td>
+
+                                </tr>
+
+                            `
+                        )
+                        .join("")
+                }
+
+            </tbody>
+
+        </table>
+
+    `;
+
+}
+
+
+/* ============================================================
+   FILTER BUTTON STATE
+   ============================================================ */
+
+function updateFilterButtons() {
+
+    document
+        .querySelectorAll(
+            "[data-decision]"
+        )
+        .forEach(
+            button => {
+
+                button.classList.toggle(
+                    "active",
+                    button.dataset.decision
+                    ===
+                    decisionFilter
+                );
+
+            }
+        );
+
+
+    document
+        .querySelectorAll(
+            "[data-risk]"
+        )
+        .forEach(
+            button => {
+
+                button.classList.toggle(
+                    "active",
+                    button.dataset.risk
+                    ===
+                    riskFilter
+                );
+
+            }
+        );
+
+}
+
+
+/* ============================================================
+   FILTER NOTICE
+   ============================================================ */
+
+function updateFilterNotice() {
+
+    const notice =
+        document.getElementById(
+            "filterNotice"
+        );
+
+
+    if (
+        decisionFilter ===
+        "BLOCK"
+    ) {
+
+        notice.textContent =
+            "Dashboard drill-down: showing blocked transactions only.";
+
+        notice.classList.add(
+            "visible"
+        );
+
+        return;
+
+    }
+
+
+    if (
+        decisionFilter ===
+        "REVIEW"
+    ) {
+
+        notice.textContent =
+            "Showing transactions currently requiring review.";
+
+        notice.classList.add(
+            "visible"
+        );
+
+        return;
+
+    }
+
+
+    if (
+        riskFilter ===
+        "HIGH"
+    ) {
+
+        notice.textContent =
+            "Dashboard drill-down: showing high-risk and critical transactions.";
+
+        notice.classList.add(
+            "visible"
+        );
+
+        return;
+
+    }
+
+
+    notice.classList.remove(
+        "visible"
+    );
+
+    notice.textContent = "";
+
+}
+
+
+/* ============================================================
+   DECISION FILTER CLICKS
+   ============================================================ */
+
+document
+    .querySelectorAll(
+        "[data-decision]"
+    )
+    .forEach(
+        button => {
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    decisionFilter =
+                        button.dataset.decision;
+
+
+                    /*
+                     * If user chooses a decision filter,
+                     * clear the URL-style risk drill-down.
+                     */
+
+                    if (
+                        decisionFilter !==
+                        "ALL"
+                    ) {
+
+                        riskFilter =
+                            "ALL";
+
+                    }
+
+
+                    updateFilterButtons();
+
+                    updateFilterNotice();
+
+                    renderTable();
+
+                }
+            );
+
+        }
+    );
+
+
+/* ============================================================
+   RISK FILTER CLICKS
+   ============================================================ */
+
+document
+    .querySelectorAll(
+        "[data-risk]"
+    )
+    .forEach(
+        button => {
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    riskFilter =
+                        button.dataset.risk;
+
+
+                    /*
+                     * If user chooses a risk filter,
+                     * clear the decision drill-down.
+                     */
+
+                    if (
+                        riskFilter !==
+                        "ALL"
+                    ) {
+
+                        decisionFilter =
+                            "ALL";
+
+                    }
+
+
+                    updateFilterButtons();
+
+                    updateFilterNotice();
+
+                    renderTable();
+
+                }
+            );
+
+        }
+    );
+
+
+/* ============================================================
+   SEARCH
+   ============================================================ */
+
+document
+    .getElementById(
+        "searchInput"
+    )
+    .addEventListener(
+        "input",
+        event => {
+
+            searchText =
+                event.target.value;
+
+
+            renderTable();
+
+        }
+    );
+
+
+/* ============================================================
+   REFRESH
+   ============================================================ */
+
+document
+    .getElementById(
+        "refreshButton"
+    )
+    .addEventListener(
+        "click",
+        async () => {
+
+            await loadPolicy();
+
+            await loadTransactions();
+
+        }
+    );
+
+
+/* ============================================================
+   TRANSACTION DETAIL
+   ============================================================ */
+
+function openTransaction(
+    visibleIndex
+) {
+
+    const rows =
+        filteredTransactions();
+
+
+    const tx =
+        rows[visibleIndex];
+
+
+    if (!tx) {
+
+        return;
+
+    }
+
+
+    document.getElementById(
+        "modalTitle"
+    ).textContent =
+        tx.transaction_id;
+
+
+    document.getElementById(
+        "modalSubtitle"
+    ).textContent =
+        `${formatTime(
+            tx.event_time
+        )} • ${tx.source || "Sentinel"}`;
+
+
+    document.getElementById(
+        "detailSummary"
+    ).innerHTML = `
+
+        <div class="detail-card">
+
+            <div class="detail-label">
+                Amount
+            </div>
+
+            <div class="detail-value">
+                ${money(
+                    tx.amount
+                )}
+            </div>
+
+        </div>
+
+
+        <div class="detail-card">
+
+            <div class="detail-label">
+                Risk Probability
+            </div>
+
+            <div class="detail-value">
+                ${Number(
+                    tx.risk_probability || 0
+                ).toFixed(6)}
+            </div>
+
+        </div>
+
+
+        <div class="detail-card">
+
+            <div class="detail-label">
+                Risk Score
+            </div>
+
+            <div class="detail-value">
+                ${Number(
+                    tx.risk_score || 0
+                ).toFixed(2)}
+            </div>
+
+        </div>
+
+
+        <div class="detail-card">
+
+            <div class="detail-label">
+                Decision
+            </div>
+
+            <div class="detail-value">
+                ${badge(
+                    tx.decision
+                )}
+            </div>
+
+        </div>
+
+    `;
+
+
+    document.getElementById(
+        "detailContext"
+    ).innerHTML = `
+
+        <div class="detail-item">
+
+            <div class="detail-item-label">
+                Customer
+            </div>
+
+            <div class="detail-item-value">
+                ${
+                    tx.customer_id || "—"
+                }
+            </div>
+
+        </div>
+
+
+        <div class="detail-item">
+
+            <div class="detail-item-label">
+                Merchant
+            </div>
+
+            <div class="detail-item-value">
+                ${
+                    tx.merchant_id || "—"
+                }
+            </div>
+
+        </div>
+
+
+        <div class="detail-item">
+
+            <div class="detail-item-label">
+                Device
+            </div>
+
+            <div class="detail-item-value">
+                ${
+                    tx.device_id || "—"
+                }
+            </div>
+
+        </div>
+
+
+        <div class="detail-item">
+
+            <div class="detail-item-label">
+                Payment Method
+            </div>
+
+            <div class="detail-item-value">
+                ${
+                    tx.payment_method || "—"
+                }
+            </div>
+
+        </div>
+
+
+        <div class="detail-item">
+
+            <div class="detail-item-label">
+                Region
+            </div>
+
+            <div class="detail-item-value">
+                ${
+                    tx.region_key || "—"
+                }
+            </div>
+
+        </div>
+
+
+        <div class="detail-item">
+
+            <div class="detail-item-label">
+                Regional Risk
+            </div>
+
+            <div class="detail-item-value">
+                ${Number(
+                    tx.regional_risk || 0
+                ).toFixed(2)}
+            </div>
+
+        </div>
+
+    `;
+
+
+    const reasons =
+        Array.isArray(
+            tx.reasons
+        )
+            ? tx.reasons
+            : [];
+
+
+    document.getElementById(
+        "detailReasons"
+    ).innerHTML =
+
+        reasons.length
+
+            ? reasons
+                .map(
+                    reason =>
+                        `<div>• ${reason}</div>`
+                )
+                .join("")
+
+            : "No additional risk reasons were recorded.";
+
+
+    document.getElementById(
+        "detailSource"
+    ).textContent =
+        `Source: ${tx.source || "—"}`;
+
+
+    document.getElementById(
+        "transactionModal"
+    ).classList.add(
+        "show"
+    );
+
+}
+
+
+function closeTransaction() {
+
+    document.getElementById(
+        "transactionModal"
+    ).classList.remove(
+        "show"
+    );
+
+}
+
+
+/* ============================================================
+   HELPERS
+   ============================================================ */
+
+function formatTime(
+    value
+) {
+
+    if (!value) {
+
+        return "—";
+
+    }
+
+
+    const date =
+        new Date(value);
+
+
+    if (
+        Number.isNaN(
+            date.getTime()
+        )
+    ) {
+
+        return String(value);
+
+    }
+
+
+    return date.toLocaleString(
+        "en-IN",
+        {
+            day: "2-digit",
+            month: "short",
+            hour: "2-digit",
+            minute: "2-digit"
+        }
+    );
+
+}
+
+
+/* ============================================================
+   INITIALIZE
+   ============================================================ */
+
+async function initialize() {
+
+    await loadPolicy();
+
+    await loadTransactions();
+
+}
+
+
+initialize();
+
+
+/* ============================================================
+   AUTO REFRESH
+   ============================================================ */
+
+setInterval(
+    loadTransactions,
+    10000
+);
+
+</script>
+
+</body>
+
+</html>

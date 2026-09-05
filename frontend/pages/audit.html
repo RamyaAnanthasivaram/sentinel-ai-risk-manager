@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Sentinel — Audit Log</title>
+
+    <link
+        rel="stylesheet"
+        href="../css/style.css"
+    >
+
+    <style>
+
+        .audit-summary {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .summary-card {
+            background: white;
+            border-radius: 14px;
+            padding: 18px;
+            box-shadow:
+                0 3px 14px
+                rgba(15, 23, 42, 0.06);
+        }
+
+        .summary-label {
+            color: #64748b;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: .4px;
+        }
+
+        .summary-value {
+            margin-top: 7px;
+            font-size: 28px;
+            font-weight: 800;
+        }
+
+        .audit-panel {
+            background: white;
+            border-radius: 14px;
+            padding: 20px;
+            box-shadow:
+                0 3px 14px
+                rgba(15, 23, 42, 0.06);
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .panel-title {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 750;
+        }
+
+        .audit-table-wrap {
+            overflow-x: auto;
+        }
+
+        .audit-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .audit-table th,
+        .audit-table td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #edf0f3;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        .audit-table th {
+            color: #64748b;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: .35px;
+        }
+
+        .audit-table td {
+            font-size: 12px;
+        }
+
+        .transaction-id {
+            font-weight: 750;
+        }
+
+        .risk-score {
+            font-weight: 750;
+        }
+
+        .reason-text {
+            color: #64748b;
+            max-width: 240px;
+            white-space: normal !important;
+            line-height: 1.4;
+        }
+
+        .reviewer {
+            color: #475569;
+        }
+
+        .empty {
+            padding: 40px;
+            text-align: center;
+            color: #94a3b8;
+            font-size: 12px;
+        }
+
+        .error {
+            padding: 14px;
+            border-radius: 9px;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+            font-size: 12px;
+        }
+
+        .action-filter {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            border: 1px solid #dbe2ea;
+            background: white;
+            color: #475569;
+            border-radius: 999px;
+            padding: 7px 11px;
+            font-size: 10px;
+            font-weight: 650;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .filter-btn.active {
+            background: #2563eb;
+            border-color: #2563eb;
+            color: white;
+        }
+
+        @media (max-width: 1000px) {
+
+            .audit-summary {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+        }
+
+        @media (max-width: 600px) {
+
+            .audit-summary {
+                grid-template-columns: 1fr;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body data-page="audit">
+
+
+<div class="app">
+
+    <aside
+        class="sidebar"
+        id="sidebar"
+    ></aside>
+
+
+    <main class="main">
+
+
+        <div class="page-header">
+
+            <div>
+
+                <h1 class="page-title">
+                    Audit Log
+                </h1>
+
+                <div class="page-subtitle">
+                    Immutable decision and review history
+                </div>
+
+            </div>
+
+            <div class="status">
+
+                <span class="status-dot"></span>
+
+                Audit Monitoring
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             SUMMARY
+             ================================================= -->
+
+        <section class="audit-summary">
+
+
+            <div class="summary-card">
+
+                <div class="summary-label">
+                    Total Events
+                </div>
+
+                <div
+                    class="summary-value"
+                    id="totalEvents"
+                >
+                    0
+                </div>
+
+            </div>
+
+
+            <div class="summary-card">
+
+                <div class="summary-label">
+                    Allowed
+                </div>
+
+                <div
+                    class="summary-value"
+                    id="allowEvents"
+                >
+                    0
+                </div>
+
+            </div>
+
+
+            <div class="summary-card">
+
+                <div class="summary-label">
+                    Reviews
+                </div>
+
+                <div
+                    class="summary-value"
+                    id="reviewEvents"
+                >
+                    0
+                </div>
+
+            </div>
+
+
+            <div class="summary-card">
+
+                <div class="summary-label">
+                    Blocks
+                </div>
+
+                <div
+                    class="summary-value"
+                    id="blockEvents"
+                >
+                    0
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             AUDIT TABLE
+             ================================================= -->
+
+        <section class="audit-panel">
+
+            <div class="panel-header">
+
+                <h2 class="panel-title">
+                    Decision History
+                </h2>
+
+
+                <div class="action-filter">
+
+                    <button
+                        class="filter-btn active"
+                        data-filter="ALL"
+                    >
+                        All
+                    </button>
+
+                    <button
+                        class="filter-btn"
+                        data-filter="ALLOW"
+                    >
+                        Allow
+                    </button>
+
+                    <button
+                        class="filter-btn"
+                        data-filter="REVIEW"
+                    >
+                        Review
+                    </button>
+
+                    <button
+                        class="filter-btn"
+                        data-filter="BLOCK"
+                    >
+                        Block
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <div
+                id="auditContainer"
+                class="audit-table-wrap"
+            >
+
+                <div class="empty">
+                    Loading audit records...
+                </div>
+
+            </div>
+
+        </section>
+
+
+    </main>
+
+</div>
+
+
+<script src="../js/app.js?v=3"></script>
+
+
+<script>
+
+const AUDIT_API =
+    "http://127.0.0.1:8001";
+
+
+let auditRecords = [];
+
+let currentFilter = "ALL";
+
+
+/* ============================================================
+   LOAD AUDIT
+   ============================================================ */
+
+async function loadAudit() {
+
+    const container =
+        document.getElementById(
+            "auditContainer"
+        );
+
+
+    try {
+
+        const response =
+            await fetch(
+                AUDIT_API +
+                "/api/audit"
+            );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Audit API returned " +
+                response.status
+            );
+
+        }
+
+
+        const data =
+            await response.json();
+
+
+        auditRecords =
+            Array.isArray(
+                data.audit
+            )
+                ? data.audit
+                : [];
+
+
+        updateSummary();
+
+        renderAudit();
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Audit API error:",
+            error
+        );
+
+
+        container.innerHTML = `
+            <div class="error">
+
+                Unable to load the audit log.
+
+                <br><br>
+
+                ${error.message}
+
+                <br><br>
+
+                Make sure the FastAPI server
+                is running on port 8001.
+
+            </div>
+        `;
+
+    }
+
+}
+
+
+/* ============================================================
+   SUMMARY
+   ============================================================ */
+
+function updateSummary() {
+
+    document.getElementById(
+        "totalEvents"
+    ).textContent =
+        auditRecords.length;
+
+
+    const allow =
+        auditRecords.filter(
+            item =>
+                String(
+                    item.recommended_action ||
+                    item.final_action ||
+                    ""
+                ).toUpperCase()
+                === "ALLOW"
+        ).length;
+
+
+    const review =
+        auditRecords.filter(
+            item =>
+                String(
+                    item.recommended_action ||
+                    item.final_action ||
+                    ""
+                ).toUpperCase()
+                === "REVIEW"
+        ).length;
+
+
+    const block =
+        auditRecords.filter(
+            item =>
+                String(
+                    item.recommended_action ||
+                    item.final_action ||
+                    ""
+                ).toUpperCase()
+                === "BLOCK"
+        ).length;
+
+
+    document.getElementById(
+        "allowEvents"
+    ).textContent =
+        allow;
+
+
+    document.getElementById(
+        "reviewEvents"
+    ).textContent =
+        review;
+
+
+    document.getElementById(
+        "blockEvents"
+    ).textContent =
+        block;
+
+}
+
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+
+function renderAudit() {
+
+    const container =
+        document.getElementById(
+            "auditContainer"
+        );
+
+
+    let rows =
+        [...auditRecords];
+
+
+    if (
+        currentFilter !== "ALL"
+    ) {
+
+        rows =
+            rows.filter(
+                item => {
+
+                    const action =
+                        String(
+                            item.recommended_action ||
+                            item.final_action ||
+                            ""
+                        ).toUpperCase();
+
+                    return (
+                        action ===
+                        currentFilter
+                    );
+
+                }
+            );
+
+    }
+
+
+    if (!rows.length) {
+
+        container.innerHTML = `
+            <div class="empty">
+                No audit events match this filter.
+            </div>
+        `;
+
+        return;
+
+    }
+
+
+    container.innerHTML = `
+
+        <table class="audit-table">
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        Time
+                    </th>
+
+                    <th>
+                        Transaction
+                    </th>
+
+                    <th>
+                        Risk
+                    </th>
+
+                    <th>
+                        Regional Risk
+                    </th>
+
+                    <th>
+                        Recommended
+                    </th>
+
+                    <th>
+                        Final Action
+                    </th>
+
+                    <th>
+                        Reason
+                    </th>
+
+                    <th>
+                        Reviewer
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                ${
+                    rows
+                        .map(
+                            item => {
+
+                                const recommended =
+                                    String(
+                                        item.recommended_action
+                                        || ""
+                                    ).toUpperCase();
+
+                                const finalAction =
+                                    String(
+                                        item.final_action
+                                        || ""
+                                    ).toUpperCase();
+
+
+                                return `
+
+                                    <tr>
+
+                                        <td>
+                                            ${formatDate(
+                                                item.timestamp
+                                            )}
+                                        </td>
+
+
+                                        <td>
+                                            <span
+                                                class="
+                                                    transaction-id
+                                                "
+                                            >
+                                                ${
+                                                    item.transaction_id
+                                                }
+                                            </span>
+                                        </td>
+
+
+                                        <td>
+                                            <span
+                                                class="
+                                                    risk-score
+                                                "
+                                            >
+                                                ${Number(
+                                                    item.risk_score || 0
+                                                ).toFixed(2)}
+                                            </span>
+                                        </td>
+
+
+                                        <td>
+                                            ${Number(
+                                                item.regional_risk || 0
+                                            ).toFixed(2)}
+                                        </td>
+
+
+                                        <td>
+                                            ${
+                                                recommended
+                                                ? badge(
+                                                    recommended
+                                                )
+                                                : "—"
+                                            }
+                                        </td>
+
+
+                                        <td>
+                                            ${
+                                                finalAction
+                                                ? badge(
+                                                    finalAction
+                                                )
+                                                : "—"
+                                            }
+                                        </td>
+
+
+                                        <td
+                                            class="
+                                                reason-text
+                                            "
+                                        >
+                                            ${
+                                                Array.isArray(
+                                                    item.reasons
+                                                )
+                                                    ? item.reasons.join(
+                                                        ", "
+                                                    )
+                                                    : (
+                                                        item.reasons
+                                                        || "—"
+                                                    )
+                                            }
+                                        </td>
+
+
+                                        <td
+                                            class="
+                                                reviewer
+                                            "
+                                        >
+                                            ${
+                                                item.reviewer
+                                                || "—"
+                                            }
+                                        </td>
+
+                                    </tr>
+
+                                `;
+
+                            }
+                        )
+                        .join("")
+                }
+
+            </tbody>
+
+        </table>
+
+    `;
+
+}
+
+
+/* ============================================================
+   FILTERS
+   ============================================================ */
+
+document
+    .querySelectorAll(
+        ".filter-btn"
+    )
+    .forEach(
+        button => {
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    currentFilter =
+                        button.dataset.filter;
+
+
+                    document
+                        .querySelectorAll(
+                            ".filter-btn"
+                        )
+                        .forEach(
+                            item =>
+                                item.classList.remove(
+                                    "active"
+                                )
+                        );
+
+
+                    button.classList.add(
+                        "active"
+                    );
+
+
+                    renderAudit();
+
+                }
+            );
+
+        }
+    );
+
+
+/* ============================================================
+   DATE
+   ============================================================ */
+
+function formatDate(
+    value
+) {
+
+    if (!value) {
+        return "—";
+    }
+
+
+    const date =
+        new Date(value);
+
+
+    if (
+        Number.isNaN(
+            date.getTime()
+        )
+    ) {
+
+        return String(value);
+
+    }
+
+
+    return date.toLocaleString(
+        "en-IN",
+        {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit"
+        }
+    );
+
+}
+
+
+/* ============================================================
+   LOAD + REFRESH
+   ============================================================ */
+
+loadAudit();
+
+
+setInterval(
+    loadAudit,
+    5000
+);
+
+</script>
+
+</body>
+
+</html>
