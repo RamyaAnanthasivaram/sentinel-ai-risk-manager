@@ -40,6 +40,7 @@ app.add_middleware(
     allow_origins=[
         "http://127.0.0.1:5500",
         "http://localhost:5500",
+        "https://sentinel-frontend-hgp5.onrender.com",
     ],
     allow_credentials=True,
     allow_methods=["*"],
