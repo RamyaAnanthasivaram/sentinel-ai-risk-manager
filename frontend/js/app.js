@@ -3,6 +3,64 @@ const SENTINEL_API =
 
 window.SENTINEL_API = SENTINEL_API;
 
+async function api(
+    path,
+    options = {}
+) {
+
+    const response =
+        await fetch(
+            SENTINEL_API + path,
+            {
+                ...options,
+
+                headers: {
+                    "Accept":
+                        "application/json",
+
+                    ...(options.headers || {})
+                }
+            }
+        );
+
+
+    if (!response.ok) {
+
+        let message =
+            `${response.status}: ${path}`;
+
+
+        try {
+
+            const data =
+                await response.json();
+
+
+            if (
+                data &&
+                data.detail
+            ) {
+
+                message =
+                    data.detail;
+
+            }
+
+        }
+
+        catch (_) {}
+
+
+        throw new Error(
+            message
+        );
+
+    }
+
+
+    return response.json();
+
+}
 
 /* =========================================================
    SIDEBAR
