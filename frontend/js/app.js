@@ -1,5 +1,7 @@
-const API =
+const SENTINEL_API =
     "https://sentinel-ai-risk-manager.onrender.com";
+
+window.SENTINEL_API = SENTINEL_API;
 
 
 /* =========================================================
@@ -15,9 +17,7 @@ function mountSidebar() {
         return;
     }
 
-
     sidebar.innerHTML = `
-
         <div class="logo">
 
             <div class="logo-title">
@@ -41,7 +41,9 @@ function mountSidebar() {
             href="dashboard.html"
             data-page="dashboard"
         >
-            <span class="nav-icon">🏠</span>
+            <span class="nav-icon">
+                🏠
+            </span>
             Dashboard
         </a>
 
@@ -56,29 +58,22 @@ function mountSidebar() {
             href="transactions.html"
             data-page="transactions"
         >
-            <span class="nav-icon">💳</span>
+            <span class="nav-icon">
+                💳
+            </span>
             Transactions
         </a>
 
-
-        <!-- SIMULATE TRANSACTION -->
 
         <a
             class="nav-link"
             href="simulate.html"
             data-page="simulate"
         >
-
-            <img
-                class="nav-image-icon"
-                src="../assets/billing.png"
-                alt=""
-            >
-
-            <span>
-                Simulate Transaction
+            <span class="nav-icon">
+                🧾
             </span>
-
+            Simulate Transaction
         </a>
 
 
@@ -87,7 +82,9 @@ function mountSidebar() {
             href="regional.html"
             data-page="regional"
         >
-            <span class="nav-icon">🌍</span>
+            <span class="nav-icon">
+                🌍
+            </span>
             Regional Risk
         </a>
 
@@ -97,7 +94,9 @@ function mountSidebar() {
             href="spikes.html"
             data-page="spikes"
         >
-            <span class="nav-icon">📈</span>
+            <span class="nav-icon">
+                📈
+            </span>
             Fraud Spikes
         </a>
 
@@ -112,7 +111,9 @@ function mountSidebar() {
             href="incidents.html"
             data-page="incidents"
         >
-            <span class="nav-icon">🚨</span>
+            <span class="nav-icon">
+                🚨
+            </span>
             Incidents
         </a>
 
@@ -122,7 +123,9 @@ function mountSidebar() {
             href="investigations.html"
             data-page="investigations"
         >
-            <span class="nav-icon">🔎</span>
+            <span class="nav-icon">
+                🔎
+            </span>
             Investigations
         </a>
 
@@ -132,7 +135,9 @@ function mountSidebar() {
             href="reviews.html"
             data-page="reviews"
         >
-            <span class="nav-icon">👤</span>
+            <span class="nav-icon">
+                👤
+            </span>
             Human Review
         </a>
 
@@ -147,7 +152,9 @@ function mountSidebar() {
             href="audit.html"
             data-page="audit"
         >
-            <span class="nav-icon">📋</span>
+            <span class="nav-icon">
+                📋
+            </span>
             Audit Log
         </a>
 
@@ -157,8 +164,10 @@ function mountSidebar() {
             href="policy.html"
             data-page="policy"
         >
-            <span class="nav-icon">⚙️</span>
-            Policy & Thresholds
+            <span class="nav-icon">
+                ⚙️
+            </span>
+            Policy &amp; Thresholds
         </a>
 
 
@@ -167,10 +176,11 @@ function mountSidebar() {
             href="health.html"
             data-page="health"
         >
-            <span class="nav-icon">🩺</span>
+            <span class="nav-icon">
+                🩺
+            </span>
             System Health
         </a>
-
     `;
 
 
@@ -180,22 +190,15 @@ function mountSidebar() {
 
     document
         .querySelectorAll(".nav-link")
-        .forEach(
-            link => {
+        .forEach(link => {
 
-                if (
-                    link.dataset.page ===
-                    page
-                ) {
-
-                    link.classList.add(
-                        "active"
-                    );
-
-                }
-
+            if (
+                link.dataset.page === page
+            ) {
+                link.classList.add("active");
             }
-        );
+
+        });
 
 }
 
@@ -204,18 +207,54 @@ function mountSidebar() {
    API HELPER
    ========================================================= */
 
-async function api(path) {
+async function api(
+    path,
+    options = {}
+) {
 
     const response =
         await fetch(
-            API + path
+            SENTINEL_API + path,
+            {
+                ...options,
+
+                headers: {
+                    "Accept":
+                        "application/json",
+
+                    ...(options.headers || {})
+                }
+            }
         );
 
 
     if (!response.ok) {
 
+        let message =
+            `${response.status}: ${path}`;
+
+
+        try {
+
+            const data =
+                await response.json();
+
+
+            if (
+                data &&
+                data.detail
+            ) {
+                message =
+                    data.detail;
+            }
+
+        }
+
+        catch (_) {}
+
+
         throw new Error(
-            `${response.status}: ${path}`
+            message
         );
 
     }
@@ -230,36 +269,87 @@ async function api(path) {
    UI HELPERS
    ========================================================= */
 
-function badge(value) {
+function badge(
+    value
+) {
+
+    const safeValue =
+        String(
+            value ?? ""
+        )
+        .toUpperCase();
+
 
     return `
-        <span class="badge ${value}">
-            ${value}
+        <span
+            class="badge ${safeValue}"
+        >
+            ${safeValue}
         </span>
     `;
 
 }
 
 
-function money(value) {
+function money(
+    value
+) {
 
     return (
         "₹" +
-        Number(value || 0)
-            .toLocaleString(
-                "en-IN",
-                {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2
-                }
-            )
+        Number(
+            value || 0
+        )
+        .toLocaleString(
+            "en-IN",
+            {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }
+        )
     );
 
 }
 
 
 /* =========================================================
-   START
+   INITIALIZE
    ========================================================= */
 
-mountSidebar();
+function initializeSentinel() {
+
+    try {
+
+        mountSidebar();
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Sidebar initialization error:",
+            error
+        );
+
+    }
+
+}
+
+
+if (
+    document.readyState ===
+    "loading"
+) {
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        initializeSentinel
+    );
+
+}
+
+else {
+
+    initializeSentinel();
+
+}

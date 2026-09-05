@@ -10,12 +10,16 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>Sentinel — Simulate Transaction</title>
+    <title>
+        Sentinel — Simulate Transaction
+    </title>
+
 
     <link
         rel="stylesheet"
         href="../css/style.css"
     >
+
 
     <style>
 
@@ -28,17 +32,20 @@
                 rgba(15, 23, 42, 0.06);
         }
 
+
         .form-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 16px;
         }
 
+
         .field {
             display: flex;
             flex-direction: column;
             gap: 6px;
         }
+
 
         .field label {
             color: #475569;
@@ -48,209 +55,362 @@
             letter-spacing: .3px;
         }
 
+
         .field input,
         .field select {
+
             width: 100%;
             box-sizing: border-box;
+
             border: 1px solid #dbe2ea;
+
             border-radius: 9px;
+
             padding: 11px 12px;
+
             font-family: inherit;
+
             font-size: 12px;
+
             outline: none;
+
         }
+
 
         .field input:focus,
         .field select:focus {
+
             border-color: #2563eb;
+
         }
+
 
         .notice {
+
             margin-bottom: 18px;
+
             padding: 12px 14px;
+
             border-radius: 9px;
+
             background: #fff7ed;
+
             border: 1px solid #fed7aa;
+
             color: #9a3412;
+
             font-size: 11px;
+
             line-height: 1.5;
+
         }
+
 
         .button-row {
+
             display: flex;
+
             gap: 10px;
+
             margin-top: 20px;
-            flex-wrap: wrap;
+
         }
+
 
         .btn {
+
             border: none;
+
             border-radius: 8px;
+
             padding: 11px 16px;
+
             font-family: inherit;
+
             font-size: 11px;
+
             font-weight: 700;
+
             cursor: pointer;
+
         }
+
 
         .btn-primary {
+
             background: #2563eb;
+
             color: white;
+
         }
 
-        .btn-primary:hover {
-            background: #1d4ed8;
-        }
 
         .btn-secondary {
+
             background: #e5e7eb;
+
             color: #172033;
+
         }
 
-        .btn-secondary:hover {
-            background: #dbe0e6;
-        }
 
         .btn:disabled {
+
             opacity: .6;
+
             cursor: not-allowed;
+
         }
+
 
         .result {
+
             display: none;
+
             margin-top: 18px;
+
         }
+
 
         .result.show {
+
             display: block;
+
         }
+
 
         .result-card {
+
             border-radius: 12px;
+
             padding: 20px;
+
             border: 1px solid #dbe2ea;
+
             background: #f8fafc;
+
         }
+
 
         .result-card.allow {
+
             background: #ecfdf5;
+
             border-color: #bbf7d0;
+
         }
+
 
         .result-card.review {
+
             background: #fffbeb;
+
             border-color: #fde68a;
+
         }
+
 
         .result-card.block {
+
             background: #fffafa;
+
             border-color: #fecaca;
+
         }
+
 
         .result-header {
+
             display: flex;
+
             justify-content: space-between;
+
             align-items: flex-start;
+
             gap: 12px;
+
         }
+
 
         .result-title {
+
             font-size: 18px;
+
             font-weight: 800;
+
         }
+
 
         .result-id {
+
             color: #64748b;
+
             font-size: 11px;
+
             margin-top: 4px;
+
         }
+
 
         .result-grid {
+
             display: grid;
+
             grid-template-columns: repeat(4, 1fr);
+
             gap: 10px;
+
             margin-top: 16px;
+
         }
+
 
         .result-metric {
+
             background: white;
+
             border-radius: 8px;
+
             padding: 11px;
+
         }
+
 
         .metric-label {
+
             color: #64748b;
+
             font-size: 8px;
+
             text-transform: uppercase;
+
         }
+
 
         .metric-value {
+
             margin-top: 4px;
+
             font-size: 15px;
+
             font-weight: 750;
+
         }
+
 
         .result-reasons {
+
             margin-top: 14px;
+
             background: white;
+
             border-radius: 8px;
+
             padding: 12px;
+
             color: #475569;
+
             font-size: 11px;
+
             line-height: 1.5;
+
         }
+
 
         .error-box {
+
             display: none;
+
             margin-top: 16px;
+
             padding: 12px;
+
             border-radius: 8px;
+
             background: #fef2f2;
+
             border: 1px solid #fecaca;
+
             color: #991b1b;
+
             font-size: 11px;
-            line-height: 1.5;
+
         }
+
 
         .error-box.show {
+
             display: block;
+
         }
+
+
+        .connection-status {
+
+            margin-top: 10px;
+
+            font-size: 10px;
+
+            color: #64748b;
+
+        }
+
+
+        .connection-status.ok {
+
+            color: #166534;
+
+        }
+
+
+        .connection-status.error {
+
+            color: #991b1b;
+
+        }
+
 
         .success-link {
+
             display: inline-block;
+
             margin-top: 14px;
-            margin-right: 14px;
+
             color: #2563eb;
+
             text-decoration: none;
+
             font-size: 11px;
+
             font-weight: 700;
+
         }
 
-        .success-link:hover {
-            text-decoration: underline;
-        }
-
-        .hint {
-            color: #94a3b8;
-            font-size: 10px;
-        }
 
         @media (max-width: 800px) {
 
             .form-grid {
+
                 grid-template-columns: 1fr;
+
             }
 
+
             .result-grid {
+
                 grid-template-columns: repeat(2, 1fr);
+
             }
 
         }
 
+
         @media (max-width: 500px) {
 
             .result-grid {
+
                 grid-template-columns: 1fr;
+
             }
 
         }
@@ -264,6 +424,7 @@
 
 
 <div class="app">
+
 
     <aside
         class="sidebar"
@@ -322,8 +483,6 @@
             <div class="form-grid">
 
 
-                <!-- TRANSACTION ID -->
-
                 <div class="field">
 
                     <label>
@@ -336,14 +495,8 @@
                         placeholder="TX-TEST-10001"
                     >
 
-                    <div class="hint">
-                        Use a new ID for every test.
-                    </div>
-
                 </div>
 
-
-                <!-- AMOUNT -->
 
                 <div class="field">
 
@@ -362,8 +515,6 @@
                 </div>
 
 
-                <!-- CUSTOMER -->
-
                 <div class="field">
 
                     <label>
@@ -379,8 +530,6 @@
                 </div>
 
 
-                <!-- MERCHANT -->
-
                 <div class="field">
 
                     <label>
@@ -395,8 +544,6 @@
 
                 </div>
 
-
-                <!-- PAYMENT -->
 
                 <div class="field">
 
@@ -429,8 +576,6 @@
                 </div>
 
 
-                <!-- DEVICE -->
-
                 <div class="field">
 
                     <label>
@@ -446,8 +591,6 @@
                 </div>
 
 
-                <!-- IP -->
-
                 <div class="field">
 
                     <label>
@@ -462,8 +605,6 @@
 
                 </div>
 
-
-                <!-- REGION -->
 
                 <div class="field">
 
@@ -485,7 +626,6 @@
 
             <div class="button-row">
 
-
                 <button
                     class="btn btn-primary"
                     id="submitButton"
@@ -498,13 +638,11 @@
 
                 <button
                     class="btn btn-secondary"
-                    id="generateButton"
                     type="button"
                     onclick="generateTransaction()"
                 >
                     Generate Test Data
                 </button>
-
 
             </div>
 
@@ -513,6 +651,14 @@
                 id="errorBox"
                 class="error-box"
             ></div>
+
+
+            <div
+                id="connectionStatus"
+                class="connection-status"
+            >
+                Connecting to Sentinel API...
+            </div>
 
 
             <div
@@ -526,18 +672,219 @@
 
     </main>
 
+
 </div>
 
 
-const API =
-    "https://sentinel-ai-risk-manager.onrender.com";
+<!-- =========================================================
+     SHARED APP
+     ========================================================= -->
+
+<script src="../js/app.js?v=4"></script>
 
 
 <script>
 
-/* ============================================================
+/* =========================================================
+   API
+   ========================================================= */
+
+const SIMULATOR_API =
+    "https://sentinel-ai-risk-manager.onrender.com";
+
+
+/* =========================================================
+   FALLBACK SIDEBAR
+   ========================================================= */
+
+function mountSimulatorSidebar() {
+
+    const sidebar =
+        document.getElementById(
+            "sidebar"
+        );
+
+
+    if (!sidebar) {
+        return;
+    }
+
+
+    /*
+       Only create the fallback if the shared
+       app.js has not already populated it.
+    */
+
+    if (
+        sidebar.innerHTML.trim() !== ""
+    ) {
+        return;
+    }
+
+
+    sidebar.innerHTML = `
+
+        <div class="logo">
+
+            <div class="logo-title">
+                SENTINEL
+            </div>
+
+            <div class="logo-subtitle">
+                AI RISK MANAGER
+            </div>
+
+        </div>
+
+
+        <div class="nav-section">
+            OVERVIEW
+        </div>
+
+
+        <a
+            class="nav-link"
+            href="dashboard.html"
+        >
+            <span class="nav-icon">
+                🏠
+            </span>
+            Dashboard
+        </a>
+
+
+        <div class="nav-section">
+            RISK
+        </div>
+
+
+        <a
+            class="nav-link"
+            href="transactions.html"
+        >
+            <span class="nav-icon">
+                💳
+            </span>
+            Transactions
+        </a>
+
+
+        <a
+            class="nav-link active"
+            href="simulate.html"
+        >
+            <span class="nav-icon">
+                🧾
+            </span>
+            Simulate Transaction
+        </a>
+
+
+        <a
+            class="nav-link"
+            href="regional.html"
+        >
+            <span class="nav-icon">
+                🌍
+            </span>
+            Regional Risk
+        </a>
+
+
+        <a
+            class="nav-link"
+            href="spikes.html"
+        >
+            <span class="nav-icon">
+                📈
+            </span>
+            Fraud Spikes
+        </a>
+
+
+        <div class="nav-section">
+            OPERATIONS
+        </div>
+
+
+        <a
+            class="nav-link"
+            href="incidents.html"
+        >
+            <span class="nav-icon">
+                🚨
+            </span>
+            Incidents
+        </a>
+
+
+        <a
+            class="nav-link"
+            href="investigations.html"
+        >
+            <span class="nav-icon">
+                🔎
+            </span>
+            Investigations
+        </a>
+
+
+        <a
+            class="nav-link"
+            href="reviews.html"
+        >
+            <span class="nav-icon">
+                👤
+            </span>
+            Human Review
+        </a>
+
+
+        <div class="nav-section">
+            GOVERNANCE
+        </div>
+
+
+        <a
+            class="nav-link"
+            href="audit.html"
+        >
+            <span class="nav-icon">
+                📋
+            </span>
+            Audit Log
+        </a>
+
+
+        <a
+            class="nav-link"
+            href="policy.html"
+        >
+            <span class="nav-icon">
+                ⚙️
+            </span>
+            Policy &amp; Thresholds
+        </a>
+
+
+        <a
+            class="nav-link"
+            href="health.html"
+        >
+            <span class="nav-icon">
+                🩺
+            </span>
+            System Health
+        </a>
+
+    `;
+
+}
+
+
+/* =========================================================
    GENERATE TEST DATA
-   ============================================================ */
+   ========================================================= */
 
 function generateTransaction() {
 
@@ -554,19 +901,60 @@ function generateTransaction() {
         `TX-TEST-${number}`;
 
 
+    /*
+       Generate across low / review / block ranges
+       so the simulator can demonstrate different
+       policy outcomes.
+    */
+
+    const scenario =
+        Math.random();
+
+
+    let amount;
+
+
+    if (scenario < 0.33) {
+
+        amount =
+            50 +
+            Math.random() * 49;
+
+    }
+
+    else if (scenario < 0.66) {
+
+        amount =
+            100 +
+            Math.random() * 99;
+
+    }
+
+    else {
+
+        amount =
+            200 +
+            Math.random() * 300;
+
+    }
+
+
     document.getElementById(
         "amount"
     ).value =
-        (
-            50 +
-            Math.random() * 450
-        ).toFixed(2);
+        amount.toFixed(2);
 
 
     document.getElementById(
         "customer_id"
     ).value =
         `CUS-TEST-${number}`;
+
+
+    document.getElementById(
+        "merchant_id"
+    ).value =
+        "MER-001";
 
 
     document.getElementById(
@@ -592,12 +980,332 @@ function generateTransaction() {
 }
 
 
-/* ============================================================
+/* =========================================================
+   ERROR
+   ========================================================= */
+
+function showError(
+    message
+) {
+
+    const errorBox =
+        document.getElementById(
+            "errorBox"
+        );
+
+
+    errorBox.textContent =
+        message;
+
+
+    errorBox.classList.add(
+        "show"
+    );
+
+}
+
+
+/* =========================================================
+   RESULT
+   ========================================================= */
+
+function showResult(
+    data
+) {
+
+    const result =
+        document.getElementById(
+            "result"
+        );
+
+
+    const decision =
+        String(
+            data &&
+            data.decision &&
+            data.decision.action
+                ? data.decision.action
+                : data &&
+                  data.decision
+                    ? data.decision
+                    : ""
+        )
+        .toUpperCase();
+
+
+    const risk =
+        data &&
+        data.risk
+            ? data.risk
+            : {};
+
+
+    const reasons =
+        data &&
+        data.decision &&
+        Array.isArray(
+            data.decision.reasons
+        )
+            ? data.decision.reasons
+            : [];
+
+
+    const resultClass =
+        decision === "ALLOW"
+            ? "allow"
+            : decision === "REVIEW"
+                ? "review"
+                : decision === "BLOCK"
+                    ? "block"
+                    : "";
+
+
+    result.innerHTML = `
+
+        <div
+            class="
+                result-card
+                ${resultClass}
+            "
+        >
+
+            <div class="result-header">
+
+                <div>
+
+                    <div class="result-title">
+                        Transaction Scored
+                    </div>
+
+                    <div class="result-id">
+
+                        ${
+                            data &&
+                            data.transaction_id
+                                ? data.transaction_id
+                                : "—"
+                        }
+
+                    </div>
+
+                </div>
+
+
+                ${
+                    decision
+                        ? `
+                            <span
+                                class="badge ${decision}"
+                            >
+                                ${decision}
+                            </span>
+                        `
+                        : ""
+                }
+
+            </div>
+
+
+            <div class="result-grid">
+
+
+                <div class="result-metric">
+
+                    <div class="metric-label">
+                        Risk Probability
+                    </div>
+
+                    <div class="metric-value">
+
+                        ${Number(
+                            risk.risk_probability || 0
+                        ).toFixed(6)}
+
+                    </div>
+
+                </div>
+
+
+                <div class="result-metric">
+
+                    <div class="metric-label">
+                        Risk Score
+                    </div>
+
+                    <div class="metric-value">
+
+                        ${Number(
+                            risk.risk_score || 0
+                        ).toFixed(2)}
+
+                    </div>
+
+                </div>
+
+
+                <div class="result-metric">
+
+                    <div class="metric-label">
+                        Risk Level
+                    </div>
+
+                    <div class="metric-value">
+
+                        ${
+                            risk.risk_level || "—"
+                        }
+
+                    </div>
+
+                </div>
+
+
+                <div class="result-metric">
+
+                    <div class="metric-label">
+                        Model
+                    </div>
+
+                    <div class="metric-value">
+
+                        ${
+                            risk.model_version ||
+                            "Sentinel-V1"
+                        }
+
+                    </div>
+
+                </div>
+
+
+            </div>
+
+
+            <div class="result-reasons">
+
+                <strong>
+                    Decision:
+                </strong>
+
+                ${
+                    decision || "—"
+                }
+
+
+                ${
+                    reasons.length
+                        ? `
+
+                            <br><br>
+
+                            <strong>
+                                Reasons:
+                            </strong>
+
+                            ${reasons.join(
+                                ", "
+                            )}
+
+                        `
+                        : ""
+                }
+
+            </div>
+
+
+            <a
+                class="success-link"
+                href="transactions.html"
+            >
+                Open Transaction Monitor →
+            </a>
+
+
+        </div>
+
+    `;
+
+
+    result.classList.add(
+        "show"
+    );
+
+}
+
+
+/* =========================================================
+   CHECK CONNECTION
+   ========================================================= */
+
+async function checkConnection() {
+
+    const status =
+        document.getElementById(
+            "connectionStatus"
+        );
+
+
+    try {
+
+        const response =
+            await fetch(
+                SIMULATOR_API +
+                "/health"
+            );
+
+
+        if (!response.ok) {
+            throw new Error(
+                `HTTP ${response.status}`
+            );
+        }
+
+
+        const data =
+            await response.json();
+
+
+        if (
+            data.status ===
+            "healthy"
+        ) {
+
+            status.textContent =
+                "Sentinel API connected";
+
+            status.classList.add(
+                "ok"
+            );
+
+        }
+
+    }
+
+    catch (error) {
+
+        status.textContent =
+            "Sentinel API connection failed";
+
+        status.classList.add(
+            "error"
+        );
+
+
+        console.error(
+            "API health check:",
+            error
+        );
+
+    }
+
+}
+
+
+/* =========================================================
    SUBMIT TRANSACTION
-   ============================================================ */
+   ========================================================= */
 
 async function submitTransaction() {
-
 
     const button =
         document.getElementById(
@@ -617,26 +1325,15 @@ async function submitTransaction() {
         );
 
 
-    /* --------------------------------------------------------
-       CLEAR PREVIOUS RESULT
-       -------------------------------------------------------- */
-
     errorBox.classList.remove(
         "show"
     );
-
-    errorBox.textContent =
-        "";
 
 
     result.classList.remove(
         "show"
     );
 
-
-    /* --------------------------------------------------------
-       READ FORM VALUES
-       -------------------------------------------------------- */
 
     const transactionId =
         document.getElementById(
@@ -688,9 +1385,9 @@ async function submitTransaction() {
         ).value.trim();
 
 
-    /* --------------------------------------------------------
+    /* =====================================================
        VALIDATION
-       -------------------------------------------------------- */
+       ===================================================== */
 
     if (!transactionId) {
 
@@ -706,8 +1403,7 @@ async function submitTransaction() {
     if (
         !Number.isFinite(
             amount
-        )
-        ||
+        ) ||
         amount <= 0
     ) {
 
@@ -756,7 +1452,7 @@ async function submitTransaction() {
     if (!ipAddress) {
 
         showError(
-            "Please enter an IP Address."
+            "Please enter an IP address."
         );
 
         return;
@@ -767,7 +1463,7 @@ async function submitTransaction() {
     if (!region) {
 
         showError(
-            "Please enter a Region."
+            "Please enter a region."
         );
 
         return;
@@ -775,9 +1471,9 @@ async function submitTransaction() {
     }
 
 
-    /* --------------------------------------------------------
+    /* =====================================================
        REQUEST BODY
-       -------------------------------------------------------- */
+       ===================================================== */
 
     const body = {
 
@@ -805,18 +1501,14 @@ async function submitTransaction() {
         region:
             region,
 
-        model_features:
-            {}
+        model_features: {}
 
     };
 
 
-    /* --------------------------------------------------------
-       SUBMIT
-       -------------------------------------------------------- */
-
     button.disabled =
         true;
+
 
     button.textContent =
         "Scoring...";
@@ -824,36 +1516,30 @@ async function submitTransaction() {
 
     try {
 
-
         const response =
             await fetch(
-                API +
+                SIMULATOR_API +
                 "/api/transactions",
                 {
-                    method:
-                        "POST",
+                    method: "POST",
 
                     headers: {
-
                         "Content-Type":
                             "application/json",
 
                         "Accept":
                             "application/json"
-
                     },
 
                     body:
                         JSON.stringify(
                             body
                         )
-
                 }
             );
 
 
-        let data =
-            null;
+        let data = null;
 
 
         try {
@@ -863,39 +1549,31 @@ async function submitTransaction() {
 
         }
 
-        catch (_) {
-
-            data =
-                null;
-
-        }
+        catch (_) {}
 
 
         if (!response.ok) {
 
-            const detail =
+            throw new Error(
+
                 data &&
                 data.detail
-                    ? data.detail
-                    : `HTTP ${response.status}`;
 
-            throw new Error(
-                detail
+                    ? data.detail
+
+                    : `HTTP ${response.status}`
+
             );
 
         }
 
 
-        /* ----------------------------------------------------
-           SHOW RESULT
-           ---------------------------------------------------- */
-
         showResult(
             data
         );
 
-
     }
+
 
     catch (error) {
 
@@ -906,17 +1584,18 @@ async function submitTransaction() {
 
 
         showError(
-            error.message
-            ||
+            error.message ||
             "Unable to submit transaction."
         );
 
     }
 
+
     finally {
 
         button.disabled =
             false;
+
 
         button.textContent =
             "Score Transaction";
@@ -926,467 +1605,20 @@ async function submitTransaction() {
 }
 
 
-/* ============================================================
-   SHOW RESULT
-   ============================================================ */
+/* =========================================================
+   START
+   ========================================================= */
 
-function showResult(
-    data
-) {
+document.addEventListener(
+    "DOMContentLoaded",
+    function() {
 
+        mountSimulatorSidebar();
 
-    const result =
-        document.getElementById(
-            "result"
-        );
-
-
-    /* --------------------------------------------------------
-       RISK OBJECT
-       -------------------------------------------------------- */
-
-    const risk =
-        data &&
-        data.risk
-            ? data.risk
-            : {};
-
-
-    /* --------------------------------------------------------
-       DECISION OBJECT
-       -------------------------------------------------------- */
-
-    const decisionObject =
-        data &&
-        data.decision
-            ? data.decision
-            : {};
-
-
-    let decision =
-        "";
-
-
-    if (
-        typeof decisionObject ===
-        "string"
-    ) {
-
-        decision =
-            decisionObject;
+        checkConnection();
 
     }
-
-    else {
-
-        decision =
-            decisionObject.action
-            ||
-            decisionObject.decision
-            ||
-            "";
-
-    }
-
-
-    decision =
-        String(
-            decision
-        ).toUpperCase();
-
-
-    /* --------------------------------------------------------
-       REASONS
-       -------------------------------------------------------- */
-
-    let reasons = [];
-
-
-    if (
-        Array.isArray(
-            decisionObject.reasons
-        )
-    ) {
-
-        reasons =
-            decisionObject.reasons;
-
-    }
-
-    else if (
-        Array.isArray(
-            data.reasons
-        )
-    ) {
-
-        reasons =
-            data.reasons;
-
-    }
-
-
-    /* --------------------------------------------------------
-       RESULT CLASS
-       -------------------------------------------------------- */
-
-    let resultClass =
-        "";
-
-
-    if (
-        decision ===
-        "ALLOW"
-    ) {
-
-        resultClass =
-            "allow";
-
-    }
-
-    else if (
-        decision ===
-        "REVIEW"
-    ) {
-
-        resultClass =
-            "review";
-
-    }
-
-    else if (
-        decision ===
-        "BLOCK"
-    ) {
-
-        resultClass =
-            "block";
-
-    }
-
-
-    /* --------------------------------------------------------
-       TRANSACTION ID
-       -------------------------------------------------------- */
-
-    const transactionId =
-        data &&
-        data.transaction_id
-            ? data.transaction_id
-            : document.getElementById(
-                "transaction_id"
-            ).value;
-
-
-    /* --------------------------------------------------------
-       RISK VALUES
-       -------------------------------------------------------- */
-
-    const probability =
-        Number(
-            risk.risk_probability
-            ?? 0
-        );
-
-
-    const score =
-        Number(
-            risk.risk_score
-            ?? (
-                probability *
-                100
-            )
-        );
-
-
-    const riskLevel =
-        risk.risk_level
-        ||
-        "—";
-
-
-    const modelVersion =
-        risk.model_version
-        ||
-        "—";
-
-
-    /* --------------------------------------------------------
-       RENDER
-       -------------------------------------------------------- */
-
-    result.innerHTML = `
-
-        <div
-            class="
-                result-card
-                ${resultClass}
-            "
-        >
-
-            <div
-                class="result-header"
-            >
-
-                <div>
-
-                    <div
-                        class="result-title"
-                    >
-                        Transaction Scored
-                    </div>
-
-
-                    <div
-                        class="result-id"
-                    >
-                        ${escapeHtml(
-                            transactionId
-                        )}
-                    </div>
-
-                </div>
-
-
-                ${
-                    decision
-                        ? badge(
-                            decision
-                        )
-                        : ""
-                }
-
-            </div>
-
-
-            <div
-                class="result-grid"
-            >
-
-
-                <div
-                    class="result-metric"
-                >
-
-                    <div
-                        class="metric-label"
-                    >
-                        Risk Probability
-                    </div>
-
-                    <div
-                        class="metric-value"
-                    >
-                        ${probability.toFixed(6)}
-                    </div>
-
-                </div>
-
-
-                <div
-                    class="result-metric"
-                >
-
-                    <div
-                        class="metric-label"
-                    >
-                        Risk Score
-                    </div>
-
-                    <div
-                        class="metric-value"
-                    >
-                        ${score.toFixed(2)}
-                    </div>
-
-                </div>
-
-
-                <div
-                    class="result-metric"
-                >
-
-                    <div
-                        class="metric-label"
-                    >
-                        Risk Level
-                    </div>
-
-                    <div
-                        class="metric-value"
-                    >
-                        ${escapeHtml(
-                            riskLevel
-                        )}
-                    </div>
-
-                </div>
-
-
-                <div
-                    class="result-metric"
-                >
-
-                    <div
-                        class="metric-label"
-                    >
-                        Model
-                    </div>
-
-                    <div
-                        class="metric-value"
-                    >
-                        ${escapeHtml(
-                            modelVersion
-                        )}
-                    </div>
-
-                </div>
-
-
-            </div>
-
-
-            <div
-                class="result-reasons"
-            >
-
-                <strong>
-                    Decision:
-                </strong>
-
-                ${
-                    escapeHtml(
-                        decision
-                        || "—"
-                    )
-                }
-
-
-                ${
-                    reasons.length
-                        ? `
-                            <br><br>
-
-                            <strong>
-                                Reasons:
-                            </strong>
-
-                            ${reasons
-                                .map(
-                                    reason =>
-                                        `
-                                        <div>
-                                            • ${
-                                                escapeHtml(
-                                                    reason
-                                                )
-                                            }
-                                        </div>
-                                        `
-                                )
-                                .join("")
-                            }
-                        `
-                        : ""
-                }
-
-            </div>
-
-
-            <a
-                class="success-link"
-                href="transactions.html"
-            >
-                Open Transaction Monitor →
-            </a>
-
-
-            ${
-                decision ===
-                "REVIEW"
-
-                    ? `
-                        <a
-                            class="success-link"
-                            href="reviews.html"
-                        >
-                            Open Human Review →
-                        </a>
-                    `
-                    : ""
-            }
-
-
-        </div>
-
-    `;
-
-
-    result.classList.add(
-        "show"
-    );
-
-}
-
-
-/* ============================================================
-   ERROR
-   ============================================================ */
-
-function showError(
-    message
-) {
-
-    const errorBox =
-        document.getElementById(
-            "errorBox"
-        );
-
-
-    errorBox.textContent =
-        message;
-
-
-    errorBox.classList.add(
-        "show"
-    );
-
-}
-
-
-/* ============================================================
-   SAFE TEXT
-   ============================================================ */
-
-function escapeHtml(
-    value
-) {
-
-    return String(
-        value ?? ""
-    )
-        .replace(
-            /&/g,
-            "&amp;"
-        )
-        .replace(
-            /</g,
-            "&lt;"
-        )
-        .replace(
-            />/g,
-            "&gt;"
-        )
-        .replace(
-            /"/g,
-            "&quot;"
-        )
-        .replace(
-            /'/g,
-            "&#039;"
-        );
-
-}
+);
 
 </script>
 
