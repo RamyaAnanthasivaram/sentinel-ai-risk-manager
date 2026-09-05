@@ -1,7 +1,11 @@
 const SENTINEL_API =
     "https://sentinel-ai-risk-manager.onrender.com";
 
-window.SENTINEL_API = SENTINEL_API;
+window.SENTINEL_API =
+    SENTINEL_API;
+
+window.API =
+    SENTINEL_API;
 
 async function api(
     path,
